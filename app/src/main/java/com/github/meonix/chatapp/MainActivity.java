@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
         mToolbar = (Toolbar) findViewById(R.id.main_page_toolbar);
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setTitle("ChatApp");
+        getSupportActionBar().setTitle("Miretty");
 
         myViewPage = (ViewPager) findViewById(R.id.main_tabs_pager);
         mytabsAccessorAdapter = new TabsAccessorAdapter(getSupportFragmentManager());
@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         if (currentUser == null) {
             SendUserToLoginActivity();
-            ;
         } else {
             VerifyUserExistance();
         }
@@ -111,13 +110,15 @@ public class MainActivity extends AppCompatActivity {
             SendUserToSettingsActivity();
         }
         if (item.getItemId() == R.id.main_find_friends_option) {
-
+            SendUsertoFindFriendsActivity();
         }
         if (item.getItemId() == R.id.main_create_group_option) {
             RequestNewGroup();
         }
         return true;
     }
+
+
 
     private void RequestNewGroup() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this, R.style.AlertDialog);
@@ -168,9 +169,12 @@ public class MainActivity extends AppCompatActivity {
     }
     private void SendUserToSettingsActivity() {
         Intent settingIntent = new Intent(MainActivity.this,SettingActivity.class);
-        settingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//        settingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(settingIntent);
-        finish();
+    }
+    private void SendUsertoFindFriendsActivity() {
+        Intent findfriendsIntent = new Intent(MainActivity.this,FindFriendsActivity.class);
+        startActivity(findfriendsIntent);
     }
 
 }

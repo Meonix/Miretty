@@ -89,6 +89,9 @@ public class GroupChatActivity extends AppCompatActivity {
 
             }
         });
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
     @Override
@@ -132,7 +135,7 @@ public class GroupChatActivity extends AppCompatActivity {
     private void InitializeFields() {
         mToolbar = (Toolbar)  findViewById(R.id.group_chat_bar_layout);
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setTitle("Group Name");
+        getSupportActionBar().setTitle(currentGroupName);
 
         SendMessageButton=(ImageButton) findViewById(R.id.send_message_button);
         userMessageInput=(EditText)  findViewById(R.id.input_group_message);
