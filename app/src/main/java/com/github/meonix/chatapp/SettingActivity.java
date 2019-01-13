@@ -266,7 +266,7 @@ public class SettingActivity extends AppCompatActivity {
                     userName.setText(retriveUserName);
                     userStatus.setText(retriveStatus);
                     Picasso.get().load(retriveProfileImage).into(userProfileImage);
-                    Picasso.get().load(retriveBackground).fit().into(backgroundProfileImage);
+                    Picasso.get().load(retriveBackground).into(backgroundProfileImage);
 
                 } else if ((dataSnapshot.exists()) && (dataSnapshot.hasChild("name"))) {
                     String retriveUserName = dataSnapshot.child("name").getValue().toString();

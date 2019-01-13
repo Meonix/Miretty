@@ -11,10 +11,14 @@
         ></include>
     <ImageView
         android:id="@+id/background_profile_image"
-        android:layout_width="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="wrap_content"
         android:layout_below="@+id/setting_toolbar"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_default" />
+        android:layout_height="wrap_content"
+        android:src="@drawable/background_default" />
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/set_profile_image"
         android:layout_width="100dp"

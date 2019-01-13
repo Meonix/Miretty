@@ -81,7 +81,8 @@ public class ProfileActivity extends AppCompatActivity {
                     getSupportActionBar().setTitle(userName);                //set Title is the name of user
                     String Background = dataSnapshot.child("BackGround_Image").getValue().toString();
 
-                    Picasso.get().load(Background).placeholder(R.drawable.profile).fit().into(backGround_visit_image);
+//                    Picasso.get().load(Background).placeholder(R.drawable.profile).fit().into(backGround_visit_image);
+                    Picasso.get().load(Background).placeholder(R.drawable.profile).into(backGround_visit_image);
                     Picasso.get().load(userImage).placeholder(R.drawable.profile).into(userProfileImage);
 
                     userProfileName.setText(userName);
