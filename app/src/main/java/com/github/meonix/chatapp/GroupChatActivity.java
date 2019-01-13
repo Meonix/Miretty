@@ -1,22 +1,19 @@
 package com.github.meonix.chatapp;
 
-import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.text.method.ScrollingMovementMethod;
-import android.view.Display;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.meonix.chatapp.adapter.AdapterMessage;
+import com.github.meonix.chatapp.model.MessageModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -26,25 +23,24 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Timer;
+import java.util.List;
 
 public class GroupChatActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
     private ImageButton SendMessageButton;
     private EditText userMessageInput;
-    private ScrollView mScrollView;
-    private TextView displayTextMessage;
-
-
-
+    private RecyclerView recyclerView;
     private FirebaseAuth mAuth;
-    private DatabaseReference UserRef,GroupNameRef,GroupMessageKeyRef;
+    private DatabaseReference UserRef, GroupNameRef, GroupMessageKeyRef;
 
-    private String currentGroupName,currentUserID,currentUserName,currentDate,currentTime;
+    private String currentGroupName, currentUserID, currentUserName, currentDate, currentTime;
+
+    private List<MessageModel> listMessage = new ArrayList<>();
+    private AdapterMessage messageAdapter = new AdapterMessage(listMessage);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,24 +49,16 @@ public class GroupChatActivity extends AppCompatActivity {
 
 
         currentGroupName = getIntent().getExtras().get("groupName").toString();
-        Toast.makeText(GroupChatActivity.this,currentGroupName,Toast.LENGTH_SHORT).show();
+        Toast.makeText(GroupChatActivity.this, currentGroupName, Toast.LENGTH_SHORT).show();
 
         mAuth = FirebaseAuth.getInstance();
         currentUserID = mAuth.getCurrentUser().getUid();
-        UserRef =FirebaseDatabase.getInstance().getReference().child("Users");
+        UserRef = FirebaseDatabase.getInstance().getReference().child("Users");
         GroupNameRef = FirebaseDatabase.getInstance().getReference().child("Groups").child(currentGroupName);
-
-
 
 
         InitializeFields();
 
-        mScrollView.post(new Runnable() {
-            @Override
-            public void run() {
-                mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
-            }
-        });
         GetUserInfo();
         SendMessageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,39 +67,40 @@ public class GroupChatActivity extends AppCompatActivity {
 
                 userMessageInput.setText("");
 
-                mScrollView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
-                    }
-                });
-
-
             }
         });
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
 
         GroupNameRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if(dataSnapshot.exists())
-                {
-                    DisplayMessage(dataSnapshot);
+                String date =dataSnapshot.child("date").getValue().toString();
+                String Message=dataSnapshot.child("message").getValue().toString();
+                String name =dataSnapshot.child("name").getValue().toString();
+                String time=dataSnapshot.child("time").getValue().toString();
+                String uid = dataSnapshot.child("uid").getValue().toString();
+                if (dataSnapshot.exists()) {
+                    MessageModel message = new MessageModel(date, Message,name, time, uid);
+                    listMessage.add(message);
+                    recyclerView.requestLayout();
                 }
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if(dataSnapshot.exists())
-                {
-                    DisplayMessage(dataSnapshot);
+                if (dataSnapshot.exists()) {
+                    if (dataSnapshot.hasChild("image")) {
+                        String date =dataSnapshot.child("date").getValue().toString();
+                        String Message=dataSnapshot.child("message").getValue().toString();
+                        String name =dataSnapshot.child("name").getValue().toString();
+                        String time=dataSnapshot.child("time").getValue().toString();
+                        String uid = dataSnapshot.child("uid").getValue().toString();
+                        MessageModel message = new MessageModel(date, Message,name, time, uid);
+                        listMessage.add(message);
+                        recyclerView.requestLayout();
+                    }
                 }
             }
 
@@ -130,25 +119,25 @@ public class GroupChatActivity extends AppCompatActivity {
 
             }
         });
+
+        recyclerView.setAdapter(messageAdapter);
     }
 
     private void InitializeFields() {
-        mToolbar = (Toolbar)  findViewById(R.id.group_chat_bar_layout);
+        mToolbar = findViewById(R.id.group_chat_bar_layout);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle(currentGroupName);
 
-        SendMessageButton=(ImageButton) findViewById(R.id.send_message_button);
-        userMessageInput=(EditText)  findViewById(R.id.input_group_message);
-        displayTextMessage=(TextView)  findViewById(R.id.group_chat_text_display);
-        mScrollView =(ScrollView)   findViewById(R.id.my_scroll_view);
+        SendMessageButton = findViewById(R.id.send_message_button);
+        userMessageInput = findViewById(R.id.input_group_message);
+        recyclerView = findViewById(R.id.groupChatRecyclerDisplay);
     }
 
     private void GetUserInfo() {
         UserRef.child(currentUserID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists())
-                {
+                if (dataSnapshot.exists()) {
                     currentUserName = dataSnapshot.child("name").getValue().toString();
                 }
             }
@@ -161,55 +150,31 @@ public class GroupChatActivity extends AppCompatActivity {
     }
 
 
-
     private void SaveMessageInfoToDatabase() {
         String message = userMessageInput.getText().toString();
         String messageKey = GroupNameRef.push().getKey();
-        if(TextUtils.isEmpty(message))
-        {
-            Toast.makeText(this,"Please write message first...",Toast.LENGTH_SHORT).show();
-        }
-        else {
-            Calendar calForDate =Calendar.getInstance();
+        if (TextUtils.isEmpty(message)) {
+            Toast.makeText(this, "Please write message first...", Toast.LENGTH_SHORT).show();
+        } else {
+            Calendar calForDate = Calendar.getInstance();
             SimpleDateFormat currentDateFormat = new SimpleDateFormat("MM dd,yyy");
             currentDate = currentDateFormat.format(calForDate.getTime());
 
-            Calendar calForTime =Calendar.getInstance();
+            Calendar calForTime = Calendar.getInstance();
             SimpleDateFormat currentTimeFormat = new SimpleDateFormat("hh:mm ss a");
             currentTime = currentTimeFormat.format(calForTime.getTime());
 
-            HashMap<String,Object>  groupMessageKey = new HashMap<>();
+            HashMap<String, Object> groupMessageKey = new HashMap<>();
             GroupNameRef.updateChildren(groupMessageKey);
 
             GroupMessageKeyRef = GroupNameRef.child(messageKey);
-            HashMap<String,Object> messageInfoMap = new HashMap<>();
-            messageInfoMap.put("name",currentUserName);
-            messageInfoMap.put("message",message);
-            messageInfoMap.put("date",currentDate);
-            messageInfoMap.put("time",currentTime);
+            HashMap<String, Object> messageInfoMap = new HashMap<>();
+            messageInfoMap.put("uid", currentUserID);
+            messageInfoMap.put("name", currentUserName);
+            messageInfoMap.put("message", message);
+            messageInfoMap.put("date", currentDate);
+            messageInfoMap.put("time", currentTime);
             GroupMessageKeyRef.updateChildren(messageInfoMap);
-        }
-    }
-
-
-
-    private void DisplayMessage(DataSnapshot dataSnapshot) {
-        Iterator iterator = dataSnapshot.getChildren().iterator();
-        while (iterator.hasNext())
-        {
-            String chatDate = (String) ((DataSnapshot)iterator.next()).getValue();
-            String chatMessage = (String) ((DataSnapshot)iterator.next()).getValue();
-            String chatName = (String) ((DataSnapshot)iterator.next()).getValue();
-            String chatTime = (String) ((DataSnapshot)iterator.next()).getValue();
-
-            displayTextMessage.append(chatName+":\n"+chatMessage +"\n"+chatTime+"      "+chatDate+"           "+"\n\n\n");
-            mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
-            mScrollView.post(new Runnable() {
-                @Override
-                public void run() {
-                    mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
-                }
-            });
         }
     }
 
