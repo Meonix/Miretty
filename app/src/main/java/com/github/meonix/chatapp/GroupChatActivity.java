@@ -14,6 +14,8 @@ import android.widget.Toast;
 
 import com.github.meonix.chatapp.adapter.AdapterMessage;
 import com.github.meonix.chatapp.model.MessageModel;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -21,6 +23,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -35,7 +38,7 @@ public class GroupChatActivity extends AppCompatActivity {
     private EditText userMessageInput;
     private RecyclerView recyclerView;
     private FirebaseAuth mAuth;
-    private DatabaseReference UserRef, GroupNameRef, GroupMessageKeyRef;
+    private DatabaseReference UserRef, GroupNameRef, GroupMessageKeyRef,NoitificationRef;
 
     private String currentGroupName, currentUserID, currentUserName, currentDate, currentTime;
 
@@ -55,7 +58,7 @@ public class GroupChatActivity extends AppCompatActivity {
         currentUserID = mAuth.getCurrentUser().getUid();
         UserRef = FirebaseDatabase.getInstance().getReference().child("Users");
         GroupNameRef = FirebaseDatabase.getInstance().getReference().child("Groups").child(currentGroupName);
-
+        NoitificationRef=FirebaseDatabase.getInstance().getReference().child("Notifications");
 
         InitializeFields();
 
@@ -175,6 +178,20 @@ public class GroupChatActivity extends AppCompatActivity {
             messageInfoMap.put("date", currentDate);
             messageInfoMap.put("time", currentTime);
             GroupMessageKeyRef.updateChildren(messageInfoMap);
+
+
+            HashMap<String ,String> chatnotificationHasmap=new HashMap<>();
+            chatnotificationHasmap.put("from",currentUserID);
+            chatnotificationHasmap.put("type","request");
+            NoitificationRef.child("fst0LsvJa6eYs45ZlqvI7UrLkIE3").push().setValue(chatnotificationHasmap)
+            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()){
+
+                    }
+                }
+            });
         }
     }
 
