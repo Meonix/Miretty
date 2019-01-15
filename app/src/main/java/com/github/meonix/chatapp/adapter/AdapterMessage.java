@@ -27,7 +27,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
     class ViewHolder extends RecyclerView.ViewHolder {
         CircleImageView cvAvatar;
         View layout;
-        TextView message_time, message_user, message_text;
+        TextView message_time, message_user, message_text,message_date;
 
         ViewHolder(View v) {
             super(v);
@@ -36,6 +36,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
             message_text = v.findViewById(R.id.message_text);
             message_time = v.findViewById(R.id.message_time);
             message_user = v.findViewById(R.id.message_user);
+            message_date = v.findViewById(R.id.message_date);
         }
     }
 
@@ -58,9 +59,11 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
         String time = messageList.get(position).getTime();
         viewHolder.message_user.setText(messageList.get(position).getName());
         viewHolder.message_text.setText(messageList.get(position).getMessage());
+        viewHolder.message_date.setText(messageList.get(position).getDate());
         viewHolder.message_time.setText(time);
         // TODO: set avater
         String uid = messageList.get(position).getUid();
+
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
         storageReference.child("Profile Images/"+uid+".jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override

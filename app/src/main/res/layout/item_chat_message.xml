@@ -50,6 +50,14 @@
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 tools:text="4:51 PM" />
+            <TextView
+                android:id="@+id/message_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/message_time"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                tools:text="Date" />
 
             <TextView
                 android:id="@+id/message_user"
@@ -68,11 +76,13 @@
                 android:layout_below="@+id/message_user"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentLeft="true"
+                android:layout_toStartOf="@id/message_date"
                 android:layout_marginTop="5dp"
                 android:singleLine="false"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textSize="18sp"
-                tools:text="Hello!" />
+                tools:text="Hello!"
+                android:layout_toLeftOf="@id/message_date" />
         </RelativeLayout>
     </android.support.v7.widget.CardView>
 </android.support.constraint.ConstraintLayout>
