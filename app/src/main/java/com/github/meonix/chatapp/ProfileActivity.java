@@ -27,7 +27,7 @@ public class ProfileActivity extends AppCompatActivity {
     private String receiverUserID,senderUserID,Current_State;
     private CircleImageView userProfileImage;
     private TextView userProfileName,userProfileStatus;
-    private Button SendMessageRequestButton;
+    private Button SendMessageRequestButton,DeclineMessageRequestButton;
     private Toolbar mToolbar;
     private ImageView backGround_visit_image;
 
