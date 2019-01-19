@@ -13,6 +13,12 @@ import com.github.meonix.chatapp.R;
 import com.github.meonix.chatapp.model.MessageModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
@@ -23,7 +29,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHolder> {
     private List<MessageModel> messageList;
-
+    private FirebaseAuth mAuth;
+    private DatabaseReference UserRef = FirebaseDatabase.getInstance().getReference().child("Users");
     class ViewHolder extends RecyclerView.ViewHolder {
         CircleImageView cvAvatar;
         View layout;
@@ -48,9 +55,11 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View v = inflater.inflate(R.layout.item_chat_message, parent, false);
-        return new ViewHolder(v);
+//        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+//        View v = inflater.inflate(R.layout.item_chat_message, parent, false);
+        View view =LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_message, parent, false);
+        mAuth = FirebaseAuth.getInstance();
+        return new ViewHolder(view);
     }
 
     @SuppressLint("SetTextI18n")
@@ -64,18 +73,38 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
         // TODO: set avater
         String uid = messageList.get(position).getUid();
 
-        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-        storageReference.child("Profile Images/"+uid+".jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+        UserRef.child(messageList.get(position).getUid()).addValueEventListener(new ValueEventListener() {
             @Override
-            public void onSuccess(Uri uri) {
-                Picasso.get().load(uri).into(viewHolder.cvAvatar);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if((dataSnapshot.exists()) && (dataSnapshot.hasChild("image"))) {
+                    String userImage = dataSnapshot.child("image").getValue().toString();
+                    Picasso.get().load(userImage).placeholder(R.drawable.profile).into(viewHolder.cvAvatar);
+                }
+                else
+                {
+                    Picasso.get().load(R.drawable.profile).placeholder(R.drawable.profile).into(viewHolder.cvAvatar);
+                }
             }
-        }).addOnFailureListener(new OnFailureListener() {
+
             @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
+
+
+//        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+////            storageReference.child("Profile Images/" + uid + ".jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+////                @Override
+////                public void onSuccess(Uri uri) {
+////                    Picasso.get().load(uri).into(viewHolder.cvAvatar);
+////                }
+////            }).addOnFailureListener(new OnFailureListener() {
+////                @Override
+////                public void onFailure(@NonNull Exception exception) {
+////                    // Handle any errors
+////                }
+////            });
     }
 
     @Override

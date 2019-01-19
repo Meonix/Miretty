@@ -133,13 +133,6 @@ public class SettingActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult( int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == GalleryPick && resultCode == RESULT_OK && data != null) {
-            Uri ImageUri = data.getData();
-            CropImage.activity()
-                    .setGuidelines(CropImageView.Guidelines.ON)
-                    .setAspectRatio(1, 1)
-                    .start(this);
-        }
         if(requestCode == MyPick && resultCode== RESULT_OK && data != null && data.getData()!= null)
         {
             UriImagebackground = data.getData();
@@ -183,9 +176,16 @@ public class SettingActivity extends AppCompatActivity {
                 });
             }
         }
+        if (requestCode == GalleryPick && resultCode == RESULT_OK && data != null) {
+
+            Uri ImageUri = data.getData();
+            CropImage.activity(ImageUri)
+                    .setGuidelines(CropImageView.Guidelines.ON).start(this);
+        }
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
+
+                CropImage.ActivityResult result = CropImage.getActivityResult(data);
 
                 loadingBar.setTitle("Set Profile Image");
                 loadingBar.setMessage("Please wait ,your  profile image is updating....");

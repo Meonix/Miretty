@@ -1,20 +1,30 @@
 package com.github.meonix.chatapp;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.github.meonix.chatapp.adapter.AdapterMessage;
 import com.github.meonix.chatapp.model.MessageModel;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -24,12 +34,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class GroupChatActivity extends AppCompatActivity {
 
@@ -38,12 +52,12 @@ public class GroupChatActivity extends AppCompatActivity {
     private EditText userMessageInput;
     private RecyclerView recyclerView;
     private FirebaseAuth mAuth;
-    private DatabaseReference UserRef, GroupNameRef, GroupMessageKeyRef,NoitificationRef;
-
+    private DatabaseReference UserRef, GroupNameRef, GroupMessageKeyRef, NoitificationRef;
     private String currentGroupName, currentUserID, currentUserName, currentDate, currentTime;
 
-    private List<MessageModel> listMessage = new ArrayList<>();
-    private AdapterMessage messageAdapter = new AdapterMessage(listMessage);
+    private final List<MessageModel> listMessage = new ArrayList<>();
+    private LinearLayoutManager linearLayoutManager;
+    private AdapterMessage messageAdapter ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +72,7 @@ public class GroupChatActivity extends AppCompatActivity {
         currentUserID = mAuth.getCurrentUser().getUid();
         UserRef = FirebaseDatabase.getInstance().getReference().child("Users");
         GroupNameRef = FirebaseDatabase.getInstance().getReference().child("Groups").child(currentGroupName);
-        NoitificationRef=FirebaseDatabase.getInstance().getReference().child("Notifications");
+        NoitificationRef = FirebaseDatabase.getInstance().getReference().child("Notifications");
 
         InitializeFields();
 
@@ -75,55 +89,6 @@ public class GroupChatActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        GroupNameRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                String date =dataSnapshot.child("date").getValue().toString();
-                String Message=dataSnapshot.child("message").getValue().toString();
-                String name =dataSnapshot.child("name").getValue().toString();
-                String time=dataSnapshot.child("time").getValue().toString();
-                String uid = dataSnapshot.child("uid").getValue().toString();
-                if (dataSnapshot.exists()) {
-                    MessageModel message = new MessageModel(date, Message,name, time, uid);
-                    listMessage.add(message);
-                    recyclerView.requestLayout();
-                }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if (dataSnapshot.exists()) {
-                    if (dataSnapshot.hasChild("image")) {
-                        String date =dataSnapshot.child("date").getValue().toString();
-                        String Message=dataSnapshot.child("message").getValue().toString();
-                        String name =dataSnapshot.child("name").getValue().toString();
-                        String time=dataSnapshot.child("time").getValue().toString();
-                        String uid = dataSnapshot.child("uid").getValue().toString();
-                        MessageModel message = new MessageModel(date, Message,name, time, uid);
-                        listMessage.add(message);
-                        recyclerView.requestLayout();
-                    }
-                }
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        recyclerView.setAdapter(messageAdapter);
     }
 
     private void InitializeFields() {
@@ -134,6 +99,10 @@ public class GroupChatActivity extends AppCompatActivity {
         SendMessageButton = findViewById(R.id.send_message_button);
         userMessageInput = findViewById(R.id.input_group_message);
         recyclerView = findViewById(R.id.groupChatRecyclerDisplay);
+        messageAdapter = new AdapterMessage(listMessage);
+        linearLayoutManager =new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(messageAdapter);
     }
 
     private void GetUserInfo() {
@@ -180,19 +149,52 @@ public class GroupChatActivity extends AppCompatActivity {
             GroupMessageKeyRef.updateChildren(messageInfoMap);
 
 
-            HashMap<String ,String> chatnotificationHasmap=new HashMap<>();
-            chatnotificationHasmap.put("from",currentUserID);
-            chatnotificationHasmap.put("type","request");
+            HashMap<String, String> chatnotificationHasmap = new HashMap<>();
+            chatnotificationHasmap.put("from", currentUserID);
+            chatnotificationHasmap.put("type", "request");
             NoitificationRef.child("fst0LsvJa6eYs45ZlqvI7UrLkIE3").push().setValue(chatnotificationHasmap)
-            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if(task.isSuccessful()){
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
 
-                    }
-                }
-            });
+                            }
+                        }
+                    });
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        GroupNameRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                MessageModel message = dataSnapshot.getValue(MessageModel.class);
+                listMessage.add(message);
+                messageAdapter.notifyDataSetChanged();
+                recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount());
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
 }

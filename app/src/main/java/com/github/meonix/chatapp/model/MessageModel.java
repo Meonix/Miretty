@@ -11,6 +11,10 @@ public class MessageModel {
         this.uid = uid;
 
     }
+    public MessageModel()
+    {
+
+    }
 
     public String getDate() {
         return date;
