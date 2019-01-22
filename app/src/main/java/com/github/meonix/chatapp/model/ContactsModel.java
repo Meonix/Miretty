@@ -1,13 +1,13 @@
-package com.github.meonix.chatapp;
+package com.github.meonix.chatapp.model;
 
-public class Contacts {
+public class ContactsModel {
     public String name,status,image;
-    public Contacts()
+    public ContactsModel()
     {
 
     }
 
-    public Contacts(String name, String status, String image) {
+    public ContactsModel(String name, String status, String image) {
 
         this.name = name;
         this.status = status;

@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.github.meonix.chatapp.model.ContactsModel;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
@@ -49,11 +50,11 @@ public class FindFriendsActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        FirebaseRecyclerOptions<Contacts> options = new FirebaseRecyclerOptions.Builder<Contacts>().setQuery(UserRef,Contacts.class).build();
+        FirebaseRecyclerOptions<ContactsModel> options = new FirebaseRecyclerOptions.Builder<ContactsModel>().setQuery(UserRef,ContactsModel.class).build();
 
-        FirebaseRecyclerAdapter<Contacts,FindFriendViewHolder> adapter = new FirebaseRecyclerAdapter<Contacts, FindFriendViewHolder>(options) {
+        FirebaseRecyclerAdapter<ContactsModel,FindFriendViewHolder> adapter = new FirebaseRecyclerAdapter<ContactsModel, FindFriendViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull FindFriendViewHolder holder, final int position, @NonNull Contacts model) {
+            protected void onBindViewHolder(@NonNull FindFriendViewHolder holder, final int position, @NonNull ContactsModel model) {
                     holder.userName.setText(model.getName());
                     holder.userStatus.setText(model.getStatus());
                     Picasso.get().load(model.getImage()).placeholder(R.drawable.profile).into(holder.profileImage);

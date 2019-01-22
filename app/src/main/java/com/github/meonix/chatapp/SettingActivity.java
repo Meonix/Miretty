@@ -277,7 +277,7 @@ public class SettingActivity extends AppCompatActivity {
         RootRef.child("Users").child(currentUserID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
-                if((dataSnapshot.exists()) && (dataSnapshot.hasChild("name")) && (dataSnapshot.hasChild("image")) && (dataSnapshot.hasChild("BackGround_Image")))
+                if((dataSnapshot.exists()) && (dataSnapshot.hasChild("name")) &&(dataSnapshot.hasChild("status")) && (dataSnapshot.hasChild("image")) && (dataSnapshot.hasChild("BackGround_Image")))
                 {
                     String retriveUserName = dataSnapshot.child("name").getValue().toString();
                     String retriveStatus = dataSnapshot.child("status").getValue().toString();
@@ -289,8 +289,8 @@ public class SettingActivity extends AppCompatActivity {
                     Picasso.get().load(retriveProfileImage).into(userProfileImage);
                     Picasso.get().load(retriveBackground).into(backgroundProfileImage);
                 }
-                else if((dataSnapshot.exists()) && (dataSnapshot.hasChild("name"))
-                        && (dataSnapshot.hasChild("image")) && !(dataSnapshot.hasChild("BackGround_Image")))
+                else if((dataSnapshot.exists()) && (dataSnapshot.hasChild("name")) &&(dataSnapshot.hasChild("status"))
+                        && (dataSnapshot.hasChild("image"))  && !(dataSnapshot.hasChild("BackGround_Image")))
                 {
                     String retriveUserName = dataSnapshot.child("name").getValue().toString();
                     String retriveStatus = dataSnapshot.child("status").getValue().toString();
@@ -300,7 +300,7 @@ public class SettingActivity extends AppCompatActivity {
                     userStatus.setText(retriveStatus);
                     Picasso.get().load(retriveProfileImage).into(userProfileImage);
                 }
-                else if((dataSnapshot.exists()) && (dataSnapshot.hasChild("name"))
+                else if((dataSnapshot.exists()) && (dataSnapshot.hasChild("name")) && (dataSnapshot.hasChild("status"))
                         && !(dataSnapshot.hasChild("image")) && (dataSnapshot.hasChild("BackGround_Image")))
                 {
                     String retriveUserName = dataSnapshot.child("name").getValue().toString();
@@ -312,7 +312,7 @@ public class SettingActivity extends AppCompatActivity {
                     Picasso.get().load(retriveBackground).into(backgroundProfileImage);
                 }
 
-                else if ((dataSnapshot.exists()) && (dataSnapshot.hasChild("name")) && !(dataSnapshot.hasChild("image")) && !(dataSnapshot.hasChild("BackGround_Image"))) {
+                else if ((dataSnapshot.exists()) && (dataSnapshot.hasChild("name")) && (dataSnapshot.hasChild("status")) && !(dataSnapshot.hasChild("image")) && !(dataSnapshot.hasChild("BackGround_Image"))) {
                     String retriveUserName = dataSnapshot.child("name").getValue().toString();
                     String retriveStatus = dataSnapshot.child("status").getValue().toString();
 

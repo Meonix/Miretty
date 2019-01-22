@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.github.meonix.chatapp.model.ContactsModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -61,12 +62,12 @@ public class ContactsFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        FirebaseRecyclerOptions options=new FirebaseRecyclerOptions.Builder<Contacts>()
-                .setQuery(ContactsRef,Contacts.class)
+        FirebaseRecyclerOptions options=new FirebaseRecyclerOptions.Builder<ContactsModel>()
+                .setQuery(ContactsRef,ContactsModel.class)
                 .build();
-        FirebaseRecyclerAdapter<Contacts,ContactsViewHolder> adapter = new FirebaseRecyclerAdapter<Contacts, ContactsViewHolder>(options) {
+        FirebaseRecyclerAdapter<ContactsModel,ContactsViewHolder> adapter = new FirebaseRecyclerAdapter<ContactsModel, ContactsViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull final ContactsViewHolder holder, int position, @NonNull Contacts model) {
+            protected void onBindViewHolder(@NonNull final ContactsViewHolder holder, int position, @NonNull ContactsModel model) {
                 String userID = getRef(position).getKey(); //Take each all the key of Contacts tree
 
                 UserRef.child(userID).addValueEventListener(new ValueEventListener() {
