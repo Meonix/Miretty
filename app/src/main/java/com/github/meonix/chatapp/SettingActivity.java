@@ -88,6 +88,7 @@ public class SettingActivity extends AppCompatActivity {
         RetrieveUserInto();
 
         setSupportActionBar(mToolbar);
+        mToolbar.setTitle("Setting");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 

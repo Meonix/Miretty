@@ -81,7 +81,7 @@ public class GroupChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 SaveMessageInfoToDatabase();
-
+                recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount());
                 userMessageInput.setText("");
 
             }
@@ -102,6 +102,7 @@ public class GroupChatActivity extends AppCompatActivity {
         messageAdapter = new AdapterMessage(listMessage);
         linearLayoutManager =new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
+        linearLayoutManager.setStackFromEnd(true);
         recyclerView.setAdapter(messageAdapter);
     }
 
