@@ -25,7 +25,7 @@
         <activity android:name=".RegisterActivity" />
         <activity
             android:name=".GroupChatActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".FindFriendsActivity"/>
         <activity
             android:name=".SettingActivity"
             android:parentActivityName=".MainActivity" />
