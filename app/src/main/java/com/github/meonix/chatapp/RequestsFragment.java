@@ -56,8 +56,6 @@ public class RequestsFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         currentUserID = mAuth.getCurrentUser().getUid();  //get current UserID
         UserRef = FirebaseDatabase.getInstance().getReference().child("Users");
-
-
         return RequestsFragmentView;
     }
 

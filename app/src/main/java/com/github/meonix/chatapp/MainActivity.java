@@ -54,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
         mytabsAccessorAdapter = new TabsAccessorAdapter(getSupportFragmentManager());
         myViewPage.setAdapter(mytabsAccessorAdapter);
 
+        //when we go back the main activity  we will back old position
+        myViewPage.setCurrentItem(myViewPage.getCurrentItem());
+
         myTablayout = (TabLayout) findViewById(R.id.main_tabs);
         myTablayout.setupWithViewPager(myViewPage);
     }

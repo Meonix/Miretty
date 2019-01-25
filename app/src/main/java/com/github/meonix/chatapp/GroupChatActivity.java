@@ -56,7 +56,6 @@ public class GroupChatActivity extends AppCompatActivity {
     private String currentGroupName, currentUserID, currentUserName, currentDate, currentTime;
 
     private final List<MessageModel> listMessage = new ArrayList<>();
-    private LinearLayoutManager linearLayoutManager;
     private AdapterMessage messageAdapter ;
 
     @Override
@@ -77,6 +76,7 @@ public class GroupChatActivity extends AppCompatActivity {
         InitializeFields();
 
         GetUserInfo();
+        recyclerView.setAdapter(messageAdapter);
         SendMessageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,9 +86,19 @@ public class GroupChatActivity extends AppCompatActivity {
 
             }
         });
+        userMessageInput.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount());
+            }
+        });
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
     }
 
     private void InitializeFields() {
@@ -100,10 +110,6 @@ public class GroupChatActivity extends AppCompatActivity {
         userMessageInput = findViewById(R.id.input_group_message);
         recyclerView = findViewById(R.id.groupChatRecyclerDisplay);
         messageAdapter = new AdapterMessage(listMessage);
-        linearLayoutManager =new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        linearLayoutManager.setStackFromEnd(true);
-        recyclerView.setAdapter(messageAdapter);
     }
 
     private void GetUserInfo() {
