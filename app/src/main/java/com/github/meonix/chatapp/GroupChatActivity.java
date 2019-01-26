@@ -81,7 +81,12 @@ public class GroupChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 SaveMessageInfoToDatabase();
-                recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount());
+                recyclerView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount());
+                    }
+                });
                 userMessageInput.setText("");
 
             }
@@ -89,7 +94,12 @@ public class GroupChatActivity extends AppCompatActivity {
         userMessageInput.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount());
+                recyclerView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount());
+                    }
+                });
             }
         });
         setSupportActionBar(mToolbar);
@@ -180,7 +190,13 @@ public class GroupChatActivity extends AppCompatActivity {
                 MessageModel message = dataSnapshot.getValue(MessageModel.class);
                 listMessage.add(message);
                 messageAdapter.notifyDataSetChanged();
-                recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount());
+                recyclerView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount());
+                    }
+                });
+
             }
 
             @Override
