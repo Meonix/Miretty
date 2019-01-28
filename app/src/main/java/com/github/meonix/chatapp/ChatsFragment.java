@@ -1,6 +1,7 @@
 package com.github.meonix.chatapp;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -34,6 +35,8 @@ public class ChatsFragment extends Fragment {
     private DatabaseReference ChatRef,UserRef;
     private FirebaseAuth mAuth;
     private String currentUserID;
+
+
     public ChatsFragment() {
         // Required empty public constructor
     }
@@ -67,18 +70,33 @@ public class ChatsFragment extends Fragment {
             protected void onBindViewHolder(@NonNull final ChatsViewHolder holder, int position, @NonNull ContactsModel model) {
                     final String usersIDs = getRef(position).getKey();
 
+                     final String[] Image = {"default_image"};
                     UserRef.child(usersIDs).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            if(dataSnapshot.hasChild("image"))
+                            if(dataSnapshot.exists())
                             {
-                                final String Image= dataSnapshot.child("image").getValue().toString();
-                                Picasso.get().load(Image).into(holder.profileImageView);
+                                if(dataSnapshot.hasChild("image"))
+                                {
+                                     Image[0] = dataSnapshot.child("image").getValue().toString();
+                                    Picasso.get().load(Image[0]).into(holder.profileImageView);
+                                }
+                                final String Name=dataSnapshot.child("name").getValue().toString();
+                                final String Status = dataSnapshot.child("status").getValue().toString();
+                                holder.userName.setText(Name);
+                                holder.userStatus.setText("Last seen: "+ "\n"+"date"+"time");
+
+                                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Intent chatItem= new Intent(getContext(),ChatActivity.class);
+                                        chatItem.putExtra("visit_user_id",usersIDs);
+                                        chatItem.putExtra("visit_user_name",Name);
+                                        chatItem.putExtra("userImage", Image[0]);
+                                        startActivity(chatItem);
+                                    }
+                                });
                             }
-                            final String Name=dataSnapshot.child("name").getValue().toString();
-                            final String Status = dataSnapshot.child("status").getValue().toString();
-                            holder.userName.setText(Name);
-                            holder.userStatus.setText("Last seen: "+ "\n"+"date"+"time");
 
                         }
 

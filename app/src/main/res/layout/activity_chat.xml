@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#fff"
     tools:context=".ChatActivity">
 
     <include
@@ -18,7 +19,9 @@
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/private_message"
+        app:stackFromEnd="true"
         android:layout_width="match_parent"
+        app:layoutManager="android.support.v7.widget.LinearLayoutManager"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/chat_liner_layout"
         app:layout_constraintEnd_toEndOf="parent"
@@ -41,6 +44,7 @@
             android:id="@+id/input_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:hint="write your message here..."
             android:padding="15dp" />
 
