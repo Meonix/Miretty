@@ -65,7 +65,7 @@ public class ChatActivity extends AppCompatActivity {
     private EditText messageInputText;
     private final List<MessagesChatModel> messagelist = new ArrayList<>();
     private messagePrivateChatAdapter messageAdapter;
-    private RecyclerView private_message_image;
+    private RecyclerView private_message_chat;
     private static final String LOG_TAG = "AudioRecordTest";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private MediaRecorder mRecorder = null;
@@ -92,7 +92,7 @@ public class ChatActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
 
-        private_message_image.setAdapter(messageAdapter);
+        private_message_chat.setAdapter(messageAdapter);
 
         userName.setText(messageReceiverName);
         Picasso.get().load(messageuserImage).placeholder(R.drawable.profile).into(userImage);
@@ -101,10 +101,11 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 SendMessage();
-                private_message_image.post(new Runnable() {
+                private_message_chat.post(new Runnable() {
                     @Override
                     public void run() {
-                        private_message_image.smoothScrollToPosition(private_message_image.getAdapter().getItemCount());
+                        private_message_chat.smoothScrollToPosition(private_message_chat.getAdapter().getItemCount());
+                        private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount()-1);
                     }
                 });
             }
@@ -112,10 +113,11 @@ public class ChatActivity extends AppCompatActivity {
         messageInputText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                private_message_image.post(new Runnable() {
+                private_message_chat.post(new Runnable() {
                     @Override
                     public void run() {
-                        private_message_image.smoothScrollToPosition(private_message_image.getAdapter().getItemCount());
+                        private_message_chat.smoothScrollToPosition(private_message_chat.getAdapter().getItemCount());
+                        private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount()-1);
                     }
                 });
             }
@@ -141,7 +143,7 @@ public class ChatActivity extends AppCompatActivity {
 
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
-        private_message_image.setLayoutManager(linearLayoutManager);
+        private_message_chat.setLayoutManager(linearLayoutManager);
 
         messagelist.clear();
         RootRef.child("Messages").child(messageSenderID).child(messageReceiverID).addChildEventListener(new ChildEventListener() {
@@ -150,10 +152,11 @@ public class ChatActivity extends AppCompatActivity {
                 MessagesChatModel message = dataSnapshot.getValue(MessagesChatModel.class);
                 messagelist.add(message);
                 messageAdapter.notifyDataSetChanged();
-                private_message_image.post(new Runnable() {
+                private_message_chat.post(new Runnable() {
                     @Override
                     public void run() {
-                        private_message_image.smoothScrollToPosition(private_message_image.getAdapter().getItemCount());
+                        private_message_chat.smoothScrollToPosition(private_message_chat.getAdapter().getItemCount());
+                        private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount()-1);
                     }
                 });
             }
@@ -180,19 +183,6 @@ public class ChatActivity extends AppCompatActivity {
         });
 
     }
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//        if (mRecorder != null) {
-//            mRecorder.release();
-//            mRecorder = null;
-//        }
-//
-//        if (mPlayer != null) {
-//            mPlayer.release();
-//            mPlayer = null;
-//        }
-//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -240,13 +230,26 @@ public class ChatActivity extends AppCompatActivity {
                 .child(messageSenderID).child(messageReceiverID).push();
         final String messagePushID = AudioRef.getKey();
         StorageReference filepath = mStorage.child(currentUser).child(messagePushID+".mp3");
-        Uri uri = Uri.fromFile(new File(mFileName));
+        final Uri uri = Uri.fromFile(new File(mFileName));
 
         filepath.putFile(uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-//                File file = new File(getExternalCacheDir().getAbsolutePath()+"/"+messagePushID+".mp3");
-//                file.delete();
+                //delete audio file is saved in storage
+                File file = new File(uri.getPath());
+                file.delete();
+                if(file.exists()){
+                    try {
+                        file.getCanonicalFile().delete();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    if(file.exists()){
+                        getApplicationContext().deleteFile(file.getName());
+                    }
+                }
+
+                
                 final String AudiodownloadUrl= task.getResult().getDownloadUrl().toString();
                 MessageAudioRef= RootRef.child("Messages").child(messageSenderID).child(messageReceiverID).child(messagePushID);
 
@@ -329,7 +332,7 @@ public class ChatActivity extends AppCompatActivity {
 
         audioMessageButton = findViewById(R.id.audio_message_btn);
         userImage = findViewById(R.id.custom_profile_image);
-        private_message_image = findViewById(R.id.private_message);
+        private_message_chat = findViewById(R.id.private_message);
         userName = findViewById(R.id.custom_profile_name);
         userLastSeen = findViewById(R.id.user_last_seen);
         sendMessagebutton = findViewById(R.id.send_message_btn);
@@ -341,10 +344,14 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        private_message_image.post(new Runnable() {
+        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+        private_message_chat.setLayoutManager(linearLayoutManager);
+        private_message_chat.post(new Runnable() {
             @Override
             public void run() {
-                private_message_image.smoothScrollToPosition(private_message_image.getAdapter().getItemCount());
+                private_message_chat.smoothScrollToPosition(private_message_chat.getAdapter().getItemCount());
+                private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount()-1);
             }
         });
     }
