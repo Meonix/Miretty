@@ -1,12 +1,16 @@
 package com.github.meonix.chatapp.adapter;
 
 import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.github.meonix.chatapp.R;
@@ -19,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -27,22 +32,23 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
     private List<MessagesChatModel> userMessageList;
     private FirebaseAuth mAuth;
     private DatabaseReference usersRef;
-
-    public messagePrivateChatAdapter(List<MessagesChatModel> userMessageList) {
-        this.userMessageList = userMessageList;
-    }
+    private MediaPlayer   mPlayer = null;
+    private boolean mStartPlaying;
 
     class MessageViewHolder extends RecyclerView.ViewHolder {
         CircleImageView avatarRevceiver;
         CardView receiverMessageCard, senderMessageCard;
         TextView PrivateMessageTime, PrivateMessageDate, receiverPrivateMessage;
         TextView senderPrivateMessage;
+        ImageButton audioOfSender,audioOfReceiver;
 
         MessageViewHolder(@NonNull View itemview) {
             super(itemview);
             receiverMessageCard = itemview.findViewById(R.id.receiver_message_card);
             senderMessageCard = itemview.findViewById(R.id.sender_message_card);
             avatarRevceiver = itemview.findViewById(R.id.private_message_image);
+            audioOfSender=itemview.findViewById(R.id.audioOfSender);
+            audioOfReceiver=itemview.findViewById(R.id.audioOfReceiver);
 
             PrivateMessageTime = itemview.findViewById(R.id.private_message_time);
             PrivateMessageDate = itemview.findViewById(R.id.private_message_date);
@@ -50,6 +56,10 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
 
             senderPrivateMessage = itemview.findViewById(R.id.sender_private_message);
         }
+    }
+
+    public messagePrivateChatAdapter(List<MessagesChatModel> userMessageList) {
+        this.userMessageList = userMessageList;
     }
 
 
@@ -64,13 +74,85 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
     @Override
     public void onBindViewHolder(@NonNull final MessageViewHolder messageViewHolder, int i) {
         String messageSenderID = mAuth.getCurrentUser().getUid();
-        MessagesChatModel messages = userMessageList.get(i);
+        final MessagesChatModel messages = userMessageList.get(i);
         String fromUserID = messages.getFrom_uid();
         String timeOfMessage = messages.getTime();
         String dayOfMessage = messages.getDate();
         String fromMessage = messages.getTime();
         String fromMessageType = messages.getType();
+
         usersRef = FirebaseDatabase.getInstance().getReference().child("Users").child(fromUserID);
+
+        messageViewHolder.receiverMessageCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if( messageViewHolder.PrivateMessageTime.getVisibility()==View.INVISIBLE) {
+                    messageViewHolder.PrivateMessageTime.setVisibility(View.VISIBLE);
+                    messageViewHolder.PrivateMessageDate.setVisibility(View.VISIBLE);
+                }
+                else{
+                    messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
+                    messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+        messageViewHolder.senderMessageCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if( messageViewHolder.PrivateMessageTime.getVisibility()==View.INVISIBLE) {
+                    messageViewHolder.PrivateMessageTime.setVisibility(View.VISIBLE);
+                    messageViewHolder.PrivateMessageDate.setVisibility(View.VISIBLE);
+                }
+                else{
+                    messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
+                    messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+        mStartPlaying = true;
+        messageViewHolder.audioOfSender.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    onPlay(mStartPlaying,messages.getMessage());
+                    if (mStartPlaying) {
+                        messageViewHolder.audioOfSender.setImageResource(R.drawable.pausebtn);
+                    } else {
+                        messageViewHolder.audioOfSender.setImageResource(R.drawable.continuebtn);
+                    }
+                    mStartPlaying = !mStartPlaying;
+//                    MediaPlayer player = new MediaPlayer();
+//                    player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//                    player.setDataSource(messages.getMessage());
+//                    player.prepare();
+//                    player.start();
+                } catch (Exception e) {
+                    // TODO: handle exception
+                }
+            }
+        });
+        messageViewHolder.audioOfReceiver.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    onPlay(mStartPlaying,messages.getMessage());
+                    if (mStartPlaying) {
+                        messageViewHolder.audioOfReceiver.setImageResource(R.drawable.pausebtn);
+                    } else {
+                        messageViewHolder.audioOfReceiver.setImageResource(R.drawable.continuebtn);
+                    }
+                    mStartPlaying = !mStartPlaying;
+//                    MediaPlayer player = new MediaPlayer();
+//                    player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//                    player.setDataSource(messages.getMessage());
+//                    player.prepare();
+//                    player.start();
+                } catch (Exception e) {
+                    // TODO: handle exception
+                }
+            }
+        });
 
         usersRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -79,32 +161,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                     String receiverImage = dataSnapshot.child("image").getValue().toString();
                     Picasso.get().load(receiverImage).placeholder(R.drawable.profile).into(messageViewHolder.avatarRevceiver);
                 }
-                messageViewHolder.receiverMessageCard.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if( messageViewHolder.PrivateMessageTime.getVisibility()==View.INVISIBLE) {
-                            messageViewHolder.PrivateMessageTime.setVisibility(View.VISIBLE);
-                            messageViewHolder.PrivateMessageDate.setVisibility(View.VISIBLE);
-                        }
-                        else{
-                            messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
-                            messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
-                        }
-                    }
-                });
-                messageViewHolder.senderMessageCard.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if( messageViewHolder.PrivateMessageTime.getVisibility()==View.INVISIBLE) {
-                            messageViewHolder.PrivateMessageTime.setVisibility(View.VISIBLE);
-                            messageViewHolder.PrivateMessageDate.setVisibility(View.VISIBLE);
-                        }
-                        else{
-                            messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
-                            messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
-                        }
-                    }
-                });
+
             }
 
             @Override
@@ -116,6 +173,8 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
             messageViewHolder.receiverMessageCard.setVisibility(View.INVISIBLE);
             messageViewHolder.avatarRevceiver.setVisibility(View.INVISIBLE);
             messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
+            messageViewHolder.audioOfSender.setVisibility(View.GONE);
+            messageViewHolder.audioOfReceiver.setVisibility(View.GONE);
 
             messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
             messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
@@ -123,6 +182,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
             if (fromUserID.equals(messageSenderID)) {
                 messageViewHolder.senderMessageCard.setVisibility(View.VISIBLE);
                 messageViewHolder.senderMessageCard.setBackgroundResource(R.drawable.sender_message_layout);
+                messageViewHolder.senderPrivateMessage.setVisibility(View.VISIBLE);
                 messageViewHolder.senderPrivateMessage.setTextColor(Color.WHITE);
                 messageViewHolder.senderPrivateMessage.setText(messages.getMessage());
                 messageViewHolder.PrivateMessageTime.setText(messages.getTime());
@@ -138,10 +198,71 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                 messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
 
                 messageViewHolder.receiverMessageCard.setBackgroundResource(R.drawable.receiver_message_layout);
+
+                messageViewHolder.receiverPrivateMessage.setVisibility(View.VISIBLE);
                 messageViewHolder.receiverPrivateMessage.setTextColor(Color.BLACK);
                 messageViewHolder.receiverPrivateMessage.setText(messages.getMessage());
             }
         }
+        else if(fromMessageType.equals("audio"))
+        {
+            messageViewHolder.receiverMessageCard.setVisibility(View.INVISIBLE);
+            messageViewHolder.avatarRevceiver.setVisibility(View.INVISIBLE);
+            messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
+            messageViewHolder.audioOfSender.setVisibility(View.INVISIBLE);
+            messageViewHolder.audioOfReceiver.setVisibility(View.INVISIBLE);
+            messageViewHolder.senderPrivateMessage.setVisibility(View.GONE);
+            messageViewHolder.receiverPrivateMessage.setVisibility(View.GONE);
+
+            messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
+            messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
+            if (fromUserID.equals(messageSenderID)) {
+                messageViewHolder.senderMessageCard.setVisibility(View.VISIBLE);
+                messageViewHolder.senderMessageCard.setBackgroundResource(R.drawable.sender_message_layout);
+                messageViewHolder.audioOfSender.setVisibility(View.VISIBLE);
+
+                messageViewHolder.PrivateMessageTime.setText(messages.getTime());
+                messageViewHolder.PrivateMessageDate.setText(messages.getDate());
+
+            } else {
+
+                messageViewHolder.PrivateMessageTime.setText(messages.getTime());
+                messageViewHolder.PrivateMessageDate.setText(messages.getDate());
+                messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
+                messageViewHolder.receiverMessageCard.setVisibility(View.VISIBLE);
+                messageViewHolder.audioOfReceiver.setVisibility(View.VISIBLE);
+
+                messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
+
+                messageViewHolder.receiverMessageCard.setBackgroundResource(R.drawable.receiver_message_layout);
+                messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
+
+            }
+        }
+    }
+
+
+    private void onPlay(boolean start,String mFileName) {
+        if (start) {
+            startPlaying(mFileName);
+        }
+        else {
+            stopPlaying();
+        }
+    }
+    private void startPlaying(String mFileName) {
+        mPlayer = new MediaPlayer();
+        try {
+            mPlayer.setDataSource(mFileName);
+            mPlayer.prepare();
+            mPlayer.start();
+        } catch (IOException e) {
+
+        }
+    }
+    private void stopPlaying() {
+        mPlayer.release();
+        mPlayer = null;
     }
 
     @Override

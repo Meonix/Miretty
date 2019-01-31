@@ -31,8 +31,11 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/private_message_image"
         app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
             android:id="@+id/receiver_private_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -44,6 +47,20 @@
             android:textColor="#FF000000"
             android:textSize="20dp"
             android:textStyle="normal"/>
+            <ImageView
+                android:id="@+id/imageOfReceiver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ImageButton
+                android:id="@+id/audioOfReceiver"
+                android:layout_width="60dp"
+                android:background="#00000000"
+                android:layout_height="60dp"
+                android:src="@drawable/continuebtn"
+                />
+        </LinearLayout>
+
     </android.support.v7.widget.CardView>
 
 
@@ -79,7 +96,10 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
             <TextView
                 android:id="@+id/sender_private_message"
                 android:layout_width="wrap_content"
@@ -92,5 +112,17 @@
                 android:textStyle="normal"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textSize="20dp"/>
+            <ImageView
+                android:id="@+id/imageOfSender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <ImageButton
+                android:id="@+id/audioOfSender"
+                android:layout_width="60dp"
+                android:background="#00000000"
+                android:layout_height="60dp"
+                android:src="@drawable/continuebtn"
+                />
+        </LinearLayout>
     </android.support.v7.widget.CardView>
 </android.support.constraint.ConstraintLayout>

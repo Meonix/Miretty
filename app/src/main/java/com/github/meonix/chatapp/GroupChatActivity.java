@@ -109,6 +109,42 @@ public class GroupChatActivity extends AppCompatActivity {
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(linearLayoutManager);
+        listMessage.clear();
+        GroupNameRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                MessageModel message = dataSnapshot.getValue(MessageModel.class);
+                listMessage.add(message);
+                messageAdapter.notifyDataSetChanged();
+                recyclerView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount());
+                    }
+                });
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void InitializeFields() {
@@ -184,40 +220,10 @@ public class GroupChatActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        listMessage.clear();
-        GroupNameRef.addChildEventListener(new ChildEventListener() {
+        recyclerView.post(new Runnable() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                MessageModel message = dataSnapshot.getValue(MessageModel.class);
-                listMessage.add(message);
-                messageAdapter.notifyDataSetChanged();
-                recyclerView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount());
-                    }
-                });
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+            public void run() {
+                recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount());
             }
         });
     }
