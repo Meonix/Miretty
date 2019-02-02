@@ -61,7 +61,7 @@ public class ChatActivity extends AppCompatActivity {
     private Toolbar ChatToolbar;
     private FirebaseAuth mAuth;
     private StorageReference mStorage;
-    private ImageButton sendMessagebutton,audioMessageButton;
+    private ImageButton sendMessagebutton,audioMessageButton,imageMessageButton;
     private EditText messageInputText;
     private final List<MessagesChatModel> messagelist = new ArrayList<>();
     private messagePrivateChatAdapter messageAdapter;
@@ -72,7 +72,6 @@ public class ChatActivity extends AppCompatActivity {
     private boolean permissionToRecordAccepted = false;
     private ProgressDialog mProgress;
     private String [] permissions = {Manifest.permission.RECORD_AUDIO};
-    private File mOutputFile=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,6 +139,12 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        imageMessageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
@@ -249,7 +254,7 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 }
 
-                
+
                 final String AudiodownloadUrl= task.getResult().getDownloadUrl().toString();
                 MessageAudioRef= RootRef.child("Messages").child(messageSenderID).child(messageReceiverID).child(messagePushID);
 
@@ -330,6 +335,7 @@ public class ChatActivity extends AppCompatActivity {
         View actionBarView = layoutInflater.inflate(R.layout.custom_chat_bar, null);
         actionbar.setCustomView(actionBarView);
 
+        imageMessageButton=findViewById(R.id.image_message_btn);
         audioMessageButton = findViewById(R.id.audio_message_btn);
         userImage = findViewById(R.id.custom_profile_image);
         private_message_chat = findViewById(R.id.private_message);

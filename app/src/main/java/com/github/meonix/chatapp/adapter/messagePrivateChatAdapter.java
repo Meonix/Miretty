@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.meonix.chatapp.R;
@@ -41,6 +42,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
         TextView PrivateMessageTime, PrivateMessageDate, receiverPrivateMessage;
         TextView senderPrivateMessage;
         ImageButton audioOfSender,audioOfReceiver;
+        ImageView senderImage,receiverImage;
 
         MessageViewHolder(@NonNull View itemview) {
             super(itemview);
@@ -55,6 +57,9 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
             receiverPrivateMessage = itemview.findViewById(R.id.receiver_private_message);
 
             senderPrivateMessage = itemview.findViewById(R.id.sender_private_message);
+
+            senderImage =itemview.findViewById(R.id.imageOfSender);
+            receiverImage=itemview.findViewById(R.id.imageOfReceiver);
         }
     }
 
@@ -76,9 +81,6 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
         String messageSenderID = mAuth.getCurrentUser().getUid();
         final MessagesChatModel messages = userMessageList.get(i);
         String fromUserID = messages.getFrom_uid();
-        String timeOfMessage = messages.getTime();
-        String dayOfMessage = messages.getDate();
-        String fromMessage = messages.getTime();
         String fromMessageType = messages.getType();
 
         usersRef = FirebaseDatabase.getInstance().getReference().child("Users").child(fromUserID);
@@ -122,11 +124,6 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                         messageViewHolder.audioOfSender.setImageResource(R.drawable.continuebtn);
                     }
                     mStartPlaying = !mStartPlaying;
-//                    MediaPlayer player = new MediaPlayer();
-//                    player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-//                    player.setDataSource(messages.getMessage());
-//                    player.prepare();
-//                    player.start();
                 } catch (Exception e) {
                     // TODO: handle exception
                 }
@@ -143,11 +140,6 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                         messageViewHolder.audioOfReceiver.setImageResource(R.drawable.continuebtn);
                     }
                     mStartPlaying = !mStartPlaying;
-//                    MediaPlayer player = new MediaPlayer();
-//                    player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-//                    player.setDataSource(messages.getMessage());
-//                    player.prepare();
-//                    player.start();
                 } catch (Exception e) {
                     // TODO: handle exception
                 }
