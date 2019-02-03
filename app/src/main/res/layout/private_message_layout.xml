@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:clipToPadding="false"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:clipToPadding="false">
+
     <de.hdodenhof.circleimageview.CircleImageView
-        android:layout_width="48dp"
         android:id="@+id/private_message_image"
+        android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/profile"
-        android:layout_marginEnd="15dp"
-        android:layout_marginBottom="10dp"
         android:layout_marginTop="15dp"
-        app:layout_constraintEnd_toStartOf="@id/receiver_message_card"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginEnd="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="10dp"
+        android:src="@drawable/profile"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginRight="15dp" />
+        app:layout_constraintEnd_toStartOf="@id/receiver_message_card"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <android.support.v7.widget.CardView
         android:id="@+id/receiver_message_card"
@@ -31,34 +32,43 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/private_message_image"
         app:layout_constraintTop_toTopOf="parent">
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <TextView
-            android:id="@+id/receiver_private_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:singleLine="false"
-            android:text="Receiver text"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textColor="#FF000000"
-            android:textSize="20dp"
-            android:textStyle="normal"/>
+                android:id="@+id/receiver_private_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:singleLine="false"
+                android:text="Receiver text"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textColor="#FF000000"
+                android:textSize="20dp"
+                android:textStyle="normal" />
+
             <ImageView
                 android:id="@+id/imageOfReceiver"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
+            <VideoView
+                android:id="@+id/videoOfReceiver"
+                android:layout_width="270dp"
+                android:layout_height="270dp"
+                android:visibility="gone" />
+
             <ImageButton
                 android:id="@+id/audioOfReceiver"
                 android:layout_width="60dp"
-                android:background="#00000000"
                 android:layout_height="60dp"
+                android:background="#00000000"
                 android:src="@drawable/continuebtn"
-                />
+                android:visibility="gone" />
         </LinearLayout>
 
     </android.support.v7.widget.CardView>
@@ -68,19 +78,20 @@
         android:id="@+id/private_message_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@id/private_message_time"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginEnd="15dp"
+        android:layout_marginRight="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/private_message_time"
         app:layout_constraintTop_toBottomOf="@id/receiver_message_card"
-        tools:text="Date"
-        android:layout_marginRight="15dp" />
+        tools:text="Date" />
+
     <TextView
         android:id="@+id/private_message_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/receiver_message_card"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/receiver_message_card"
         tools:text="4:51 PM" />
 
 
@@ -91,15 +102,17 @@
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         app:cardBackgroundColor="@color/colorPrimary"
-        app:cardUseCompatPadding="true"
         app:cardCornerRadius="10dp"
+        app:cardUseCompatPadding="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/sender_private_message"
                 android:layout_width="wrap_content"
@@ -108,21 +121,29 @@
                 android:layout_alignParentLeft="true"
                 android:singleLine="false"
                 android:text="Receiver text"
-                android:textColor="#FFFFFF"
-                android:textStyle="normal"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                android:textSize="20dp"/>
+                android:textColor="#FFFFFF"
+                android:textSize="20dp"
+                android:textStyle="normal" />
+
             <ImageView
                 android:id="@+id/imageOfSender"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+
+            <VideoView
+                android:id="@+id/videoOfSender"
+                android:layout_width="270dp"
+                android:layout_height="270dp"
+                android:visibility="gone" />
+
             <ImageButton
                 android:id="@+id/audioOfSender"
                 android:layout_width="60dp"
-                android:background="#00000000"
                 android:layout_height="60dp"
+                android:background="#00000000"
                 android:src="@drawable/continuebtn"
-                />
+                android:visibility="gone" />
         </LinearLayout>
     </android.support.v7.widget.CardView>
 </android.support.constraint.ConstraintLayout>

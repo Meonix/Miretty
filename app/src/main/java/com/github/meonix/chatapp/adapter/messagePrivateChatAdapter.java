@@ -3,6 +3,7 @@ package com.github.meonix.chatapp.adapter;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import com.github.meonix.chatapp.R;
 import com.github.meonix.chatapp.model.MessagesChatModel;
@@ -33,24 +35,25 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
     private List<MessagesChatModel> userMessageList;
     private FirebaseAuth mAuth;
     private DatabaseReference usersRef;
-    private MediaPlayer   mPlayer = null;
-    private boolean mStartPlaying;
+    private MediaPlayer mPlayer = null;
+    private boolean mStartPlaying, playvideo;
 
     class MessageViewHolder extends RecyclerView.ViewHolder {
         CircleImageView avatarRevceiver;
         CardView receiverMessageCard, senderMessageCard;
         TextView PrivateMessageTime, PrivateMessageDate, receiverPrivateMessage;
         TextView senderPrivateMessage;
-        ImageButton audioOfSender,audioOfReceiver;
-        ImageView senderImage,receiverImage;
+        ImageButton audioOfSender, audioOfReceiver;
+        ImageView senderImage, receiverImage;
+        VideoView senderVideo, receiverVideo;
 
         MessageViewHolder(@NonNull View itemview) {
             super(itemview);
             receiverMessageCard = itemview.findViewById(R.id.receiver_message_card);
             senderMessageCard = itemview.findViewById(R.id.sender_message_card);
             avatarRevceiver = itemview.findViewById(R.id.private_message_image);
-            audioOfSender=itemview.findViewById(R.id.audioOfSender);
-            audioOfReceiver=itemview.findViewById(R.id.audioOfReceiver);
+            audioOfSender = itemview.findViewById(R.id.audioOfSender);
+            audioOfReceiver = itemview.findViewById(R.id.audioOfReceiver);
 
             PrivateMessageTime = itemview.findViewById(R.id.private_message_time);
             PrivateMessageDate = itemview.findViewById(R.id.private_message_date);
@@ -58,8 +61,11 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
 
             senderPrivateMessage = itemview.findViewById(R.id.sender_private_message);
 
-            senderImage =itemview.findViewById(R.id.imageOfSender);
-            receiverImage=itemview.findViewById(R.id.imageOfReceiver);
+            senderImage = itemview.findViewById(R.id.imageOfSender);
+            receiverImage = itemview.findViewById(R.id.imageOfReceiver);
+
+            senderVideo = itemview.findViewById(R.id.videoOfSender);
+            receiverVideo = itemview.findViewById(R.id.videoOfReceiver);
         }
     }
 
@@ -88,11 +94,10 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
         messageViewHolder.receiverMessageCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if( messageViewHolder.PrivateMessageTime.getVisibility()==View.INVISIBLE) {
+                if (messageViewHolder.PrivateMessageTime.getVisibility() == View.INVISIBLE) {
                     messageViewHolder.PrivateMessageTime.setVisibility(View.VISIBLE);
                     messageViewHolder.PrivateMessageDate.setVisibility(View.VISIBLE);
-                }
-                else{
+                } else {
                     messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
                     messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
                 }
@@ -101,11 +106,10 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
         messageViewHolder.senderMessageCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if( messageViewHolder.PrivateMessageTime.getVisibility()==View.INVISIBLE) {
+                if (messageViewHolder.PrivateMessageTime.getVisibility() == View.INVISIBLE) {
                     messageViewHolder.PrivateMessageTime.setVisibility(View.VISIBLE);
                     messageViewHolder.PrivateMessageDate.setVisibility(View.VISIBLE);
-                }
-                else{
+                } else {
                     messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
                     messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
                 }
@@ -117,7 +121,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
             @Override
             public void onClick(View v) {
                 try {
-                    onPlay(mStartPlaying,messages.getMessage());
+                    onPlay(mStartPlaying, messages.getMessage());
                     if (mStartPlaying) {
                         messageViewHolder.audioOfSender.setImageResource(R.drawable.pausebtn);
                     } else {
@@ -134,7 +138,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
             @Override
             public void onClick(View v) {
                 try {
-                    onPlay(mStartPlaying,messages.getMessage());
+                    onPlay(mStartPlaying, messages.getMessage());
                     if (mStartPlaying) {
                         messageViewHolder.audioOfReceiver.setImageResource(R.drawable.pausebtn);
                     } else {
@@ -146,6 +150,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                 }
             }
         });
+
 
         usersRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -163,13 +168,16 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
             }
         });
         if (fromMessageType.equals("text")) {
-            messageViewHolder.receiverMessageCard.setVisibility(View.INVISIBLE);
-            messageViewHolder.avatarRevceiver.setVisibility(View.INVISIBLE);
-            messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
             messageViewHolder.audioOfSender.setVisibility(View.GONE);
             messageViewHolder.audioOfReceiver.setVisibility(View.GONE);
             messageViewHolder.receiverImage.setVisibility(View.GONE);
             messageViewHolder.senderImage.setVisibility(View.GONE);
+            messageViewHolder.receiverVideo.setVisibility(View.GONE);
+            messageViewHolder.senderVideo.setVisibility(View.GONE);
+
+            messageViewHolder.receiverMessageCard.setVisibility(View.INVISIBLE);
+            messageViewHolder.avatarRevceiver.setVisibility(View.INVISIBLE);
+            messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
 
             messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
             messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
@@ -198,18 +206,19 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                 messageViewHolder.receiverPrivateMessage.setTextColor(Color.BLACK);
                 messageViewHolder.receiverPrivateMessage.setText(messages.getMessage());
             }
-        }
-        else if(fromMessageType.equals("audio"))
-        {
+        } else if (fromMessageType.equals("audio")) {
             messageViewHolder.receiverMessageCard.setVisibility(View.INVISIBLE);
             messageViewHolder.avatarRevceiver.setVisibility(View.INVISIBLE);
             messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
             messageViewHolder.audioOfSender.setVisibility(View.INVISIBLE);
             messageViewHolder.audioOfReceiver.setVisibility(View.INVISIBLE);
+
             messageViewHolder.senderPrivateMessage.setVisibility(View.GONE);
             messageViewHolder.receiverPrivateMessage.setVisibility(View.GONE);
             messageViewHolder.receiverImage.setVisibility(View.GONE);
             messageViewHolder.senderImage.setVisibility(View.GONE);
+            messageViewHolder.receiverVideo.setVisibility(View.GONE);
+            messageViewHolder.senderVideo.setVisibility(View.GONE);
 
             messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
             messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
@@ -235,16 +244,17 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                 messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
 
             }
-        }
-        else if(fromMessageType.equals("image"))
-        {
+        } else if (fromMessageType.equals("image")) {
             messageViewHolder.senderPrivateMessage.setVisibility(View.GONE);
             messageViewHolder.receiverPrivateMessage.setVisibility(View.GONE);
+            messageViewHolder.audioOfSender.setVisibility(View.GONE);
+            messageViewHolder.audioOfReceiver.setVisibility(View.GONE);
+            messageViewHolder.receiverVideo.setVisibility(View.GONE);
+            messageViewHolder.senderVideo.setVisibility(View.GONE);
+
             messageViewHolder.receiverMessageCard.setVisibility(View.INVISIBLE);
             messageViewHolder.avatarRevceiver.setVisibility(View.INVISIBLE);
             messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
-            messageViewHolder.audioOfSender.setVisibility(View.GONE);
-            messageViewHolder.audioOfReceiver.setVisibility(View.GONE);
             messageViewHolder.receiverImage.setVisibility(View.INVISIBLE);
             messageViewHolder.senderImage.setVisibility(View.INVISIBLE);
 
@@ -255,7 +265,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                 messageViewHolder.senderMessageCard.setBackgroundResource(R.drawable.sender_message_layout);
                 messageViewHolder.senderImage.setVisibility(View.VISIBLE);
 
-                String urlImage=messages.getMessage();
+                String urlImage = messages.getMessage();
                 Picasso.get().load(urlImage).into(messageViewHolder.senderImage);
                 messageViewHolder.PrivateMessageTime.setText(messages.getTime());
                 messageViewHolder.PrivateMessageDate.setText(messages.getDate());
@@ -267,8 +277,90 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                 messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
                 messageViewHolder.receiverMessageCard.setVisibility(View.VISIBLE);
 
-                String urlImage=messages.getMessage();
+                String urlImage = messages.getMessage();
                 Picasso.get().load(urlImage).into(messageViewHolder.receiverImage);
+                messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
+
+                messageViewHolder.receiverMessageCard.setBackgroundResource(R.drawable.receiver_message_layout);
+                messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
+
+            }
+        } else if (fromMessageType.equals("video")) {
+            messageViewHolder.senderPrivateMessage.setVisibility(View.GONE);
+            messageViewHolder.receiverPrivateMessage.setVisibility(View.GONE);
+            messageViewHolder.receiverImage.setVisibility(View.GONE);
+            messageViewHolder.senderImage.setVisibility(View.GONE);
+            messageViewHolder.audioOfSender.setVisibility(View.GONE);
+            messageViewHolder.audioOfReceiver.setVisibility(View.GONE);
+
+            messageViewHolder.receiverMessageCard.setVisibility(View.INVISIBLE);
+            messageViewHolder.avatarRevceiver.setVisibility(View.INVISIBLE);
+            messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
+            messageViewHolder.receiverVideo.setVisibility(View.INVISIBLE);
+            messageViewHolder.senderVideo.setVisibility(View.INVISIBLE);
+
+            messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
+            messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
+
+            playvideo = true;
+            if (fromUserID.equals(messageSenderID)) {
+                messageViewHolder.senderMessageCard.setVisibility(View.VISIBLE);
+                messageViewHolder.senderMessageCard.setBackgroundResource(R.drawable.sender_message_layout);
+                messageViewHolder.senderVideo.setVisibility(View.VISIBLE);
+
+                String uriVideo = messages.getMessage();
+                Uri uri = Uri.parse(uriVideo);
+
+                messageViewHolder.senderVideo.setVideoURI(uri);
+                messageViewHolder.senderVideo.requestFocus();
+                messageViewHolder.senderMessageCard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            if (playvideo) {
+                                messageViewHolder.senderVideo.start();
+                            } else {
+                                messageViewHolder.senderVideo.pause();
+                            }
+                            playvideo = !playvideo;
+                        } catch (Exception e) {
+                            // TODO: handle exception
+                        }
+                    }
+                });
+
+                messageViewHolder.PrivateMessageTime.setText(messages.getTime());
+                messageViewHolder.PrivateMessageDate.setText(messages.getDate());
+
+            } else {
+                messageViewHolder.receiverImage.setVisibility(View.VISIBLE);
+                messageViewHolder.PrivateMessageTime.setText(messages.getTime());
+                messageViewHolder.PrivateMessageDate.setText(messages.getDate());
+                messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
+                messageViewHolder.receiverMessageCard.setVisibility(View.VISIBLE);
+                messageViewHolder.receiverVideo.setVisibility(View.VISIBLE);
+
+                String uriVideo = messages.getMessage();
+                Uri uri = Uri.parse(uriVideo);
+
+                messageViewHolder.receiverVideo.setVideoURI(uri);
+                messageViewHolder.receiverVideo.requestFocus();
+                messageViewHolder.receiverMessageCard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            if (playvideo) {
+                                messageViewHolder.receiverVideo.start();
+                            } else {
+                                messageViewHolder.receiverVideo.pause();
+                            }
+                            playvideo = !playvideo;
+                        } catch (Exception e) {
+                            // TODO: handle exception
+                        }
+                    }
+                });
+
                 messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
 
                 messageViewHolder.receiverMessageCard.setBackgroundResource(R.drawable.receiver_message_layout);
@@ -279,14 +371,14 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
     }
 
 
-    private void onPlay(boolean start,String mFileName) {
+    private void onPlay(boolean start, String mFileName) {
         if (start) {
             startPlaying(mFileName);
-        }
-        else {
+        } else {
             stopPlaying();
         }
     }
+
     private void startPlaying(String mFileName) {
         mPlayer = new MediaPlayer();
         try {
@@ -297,6 +389,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
 
         }
     }
+
     private void stopPlaying() {
         mPlayer.release();
         mPlayer = null;

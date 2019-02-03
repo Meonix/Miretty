@@ -2,6 +2,7 @@ package com.github.meonix.chatapp;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -58,10 +59,10 @@ public class ChatActivity extends AppCompatActivity {
     private static String mFileName = null;
     private TextView userName, userLastSeen;
     private CircleImageView userImage;
-    private DatabaseReference RootRef, AudioRef, MessageAudioRef,ImageRef,MessageImageRef;
+    private DatabaseReference RootRef, AudioRef, MessageAudioRef, ImageRef, MessageImageRef;
     private Toolbar ChatToolbar;
     private FirebaseAuth mAuth;
-    private StorageReference audioPrivateChat, ImagePrivateChat;
+    private StorageReference audioPrivateChat, ImagePrivateChat, videoPrivateChat;
     private ImageButton sendMessagebutton, audioMessageButton, imageMessageButton;
     private EditText messageInputText;
     private final List<MessagesChatModel> messagelist = new ArrayList<>();
@@ -87,6 +88,7 @@ public class ChatActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         audioPrivateChat = FirebaseStorage.getInstance().getReference().child("Audio Messages");
         ImagePrivateChat = FirebaseStorage.getInstance().getReference().child("Image Message");
+        videoPrivateChat = FirebaseStorage.getInstance().getReference().child("Video Messages");
         messageSenderID = mAuth.getCurrentUser().getUid();
         currentUser = messageSenderID;
         mProgress = new ProgressDialog(this);
@@ -148,7 +150,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent GIntent = new Intent();
                 GIntent.setAction(Intent.ACTION_GET_CONTENT);
-                GIntent.setType("image/*");
+                GIntent.setType("*/*");
                 startActivityForResult(GIntent, MyPick);
             }
         });
@@ -201,44 +203,88 @@ public class ChatActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MyPick && resultCode == RESULT_OK && data != null && data.getData() != null) {
             UriImageMessage = data.getData();
+            ContentResolver cr = this.getContentResolver();
+            String Type = cr.getType(UriImageMessage);
 
-            if (UriImageMessage != null) {
+            if (Type.contains("image/")) {
+                if (UriImageMessage != null) {
 
-                ImageRef = RootRef.child("Messages")
-                        .child(messageSenderID).child(messageReceiverID).push();
-                final String messagePushID = ImageRef.getKey();
-                StorageReference red = ImagePrivateChat.child(currentUser).child(messagePushID + ".jpg");
-                red.putFile(UriImageMessage).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            final String downloadUrl = task.getResult().getDownloadUrl().toString();
+                    ImageRef = RootRef.child("Messages")
+                            .child(messageSenderID).child(messageReceiverID).push();
+                    final String messagePushID = ImageRef.getKey();
+                    StorageReference red = ImagePrivateChat.child(currentUser).child(messagePushID + ".jpg");
+                    red.putFile(UriImageMessage).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                final String downloadUrl = task.getResult().getDownloadUrl().toString();
 
 
-                            //RootRef.child("Users").child(currentUser).child("BackGround_Image").setValue(downloadUrl);
-                            MessageImageRef = RootRef.child("Messages").child(messageSenderID).child(messageReceiverID).child(messagePushID);
-                            String messageSenderRef = "Messages/" + messageSenderID + "/" + messageReceiverID;
-                            String messageReceiverRef = "Messages/" + messageReceiverID + "/" + messageSenderID;
-                            Calendar calForDate = Calendar.getInstance();
-                            SimpleDateFormat currentDateFormat = new SimpleDateFormat("MM dd,yyy");
-                            currentDate = currentDateFormat.format(calForDate.getTime());
+                                //RootRef.child("Users").child(currentUser).child("BackGround_Image").setValue(downloadUrl);
+                                MessageImageRef = RootRef.child("Messages").child(messageSenderID).child(messageReceiverID).child(messagePushID);
+                                String messageSenderRef = "Messages/" + messageSenderID + "/" + messageReceiverID;
+                                String messageReceiverRef = "Messages/" + messageReceiverID + "/" + messageSenderID;
+                                Calendar calForDate = Calendar.getInstance();
+                                SimpleDateFormat currentDateFormat = new SimpleDateFormat("MM dd,yyy");
+                                currentDate = currentDateFormat.format(calForDate.getTime());
 
-                            Calendar calForTime = Calendar.getInstance();
-                            SimpleDateFormat currentTimeFormat = new SimpleDateFormat("hh:mm ss a");
-                            currentTime = currentTimeFormat.format(calForTime.getTime());
-                            Map messageTextBody = new HashMap();
-                            messageTextBody.put("from_uid", messageSenderID);
-                            messageTextBody.put("message", downloadUrl);
-                            messageTextBody.put("date", currentDate);
-                            messageTextBody.put("time", currentTime);
-                            messageTextBody.put("type", "image");
-                            Map messageBodyDetails = new HashMap();
-                            messageBodyDetails.put(messageSenderRef + "/" + messagePushID, messageTextBody);
-                            messageBodyDetails.put(messageReceiverRef + "/" + messagePushID, messageTextBody);
-                            RootRef.updateChildren(messageBodyDetails);
+                                Calendar calForTime = Calendar.getInstance();
+                                SimpleDateFormat currentTimeFormat = new SimpleDateFormat("hh:mm ss a");
+                                currentTime = currentTimeFormat.format(calForTime.getTime());
+                                Map messageTextBody = new HashMap();
+                                messageTextBody.put("from_uid", messageSenderID);
+                                messageTextBody.put("message", downloadUrl);
+                                messageTextBody.put("date", currentDate);
+                                messageTextBody.put("time", currentTime);
+                                messageTextBody.put("type", "image");
+                                Map messageBodyDetails = new HashMap();
+                                messageBodyDetails.put(messageSenderRef + "/" + messagePushID, messageTextBody);
+                                messageBodyDetails.put(messageReceiverRef + "/" + messagePushID, messageTextBody);
+                                RootRef.updateChildren(messageBodyDetails);
+                            }
                         }
-                    }
-                });
+                    });
+                }
+            } else if (Type.contains("video/")) {
+                if (UriImageMessage != null) {
+                    ImageRef = RootRef.child("Messages")
+                            .child(messageSenderID).child(messageReceiverID).push();
+                    final String messagePushID = ImageRef.getKey();
+                    StorageReference red = videoPrivateChat.child(currentUser).child(messagePushID + ".mp4");
+                    red.putFile(UriImageMessage).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                final String downloadUrl = task.getResult().getDownloadUrl().toString();
+
+
+                                //RootRef.child("Users").child(currentUser).child("BackGround_Image").setValue(downloadUrl);
+                                MessageImageRef = RootRef.child("Messages").child(messageSenderID).child(messageReceiverID).child(messagePushID);
+                                String messageSenderRef = "Messages/" + messageSenderID + "/" + messageReceiverID;
+                                String messageReceiverRef = "Messages/" + messageReceiverID + "/" + messageSenderID;
+                                Calendar calForDate = Calendar.getInstance();
+                                SimpleDateFormat currentDateFormat = new SimpleDateFormat("MM dd,yyy");
+                                currentDate = currentDateFormat.format(calForDate.getTime());
+
+                                Calendar calForTime = Calendar.getInstance();
+                                SimpleDateFormat currentTimeFormat = new SimpleDateFormat("hh:mm ss a");
+                                currentTime = currentTimeFormat.format(calForTime.getTime());
+                                Map messageTextBody = new HashMap();
+                                messageTextBody.put("from_uid", messageSenderID);
+                                messageTextBody.put("message", downloadUrl);
+                                messageTextBody.put("date", currentDate);
+                                messageTextBody.put("time", currentTime);
+                                messageTextBody.put("type", "video");
+                                Map messageBodyDetails = new HashMap();
+                                messageBodyDetails.put(messageSenderRef + "/" + messagePushID, messageTextBody);
+                                messageBodyDetails.put(messageReceiverRef + "/" + messagePushID, messageTextBody);
+                                RootRef.updateChildren(messageBodyDetails);
+                            }
+                        }
+                    });
+                }
+            } else {
+                Toast.makeText(this, "Operation has been canceled", Toast.LENGTH_SHORT).show();
             }
         }
     }
