@@ -9,6 +9,7 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -53,15 +54,15 @@ import java.util.Map;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatActivity extends AppCompatActivity {
-    private String messageReceiverID, messageReceiverName, messageuserImage, messageSenderID, currentDate, currentTime,currentUser;
-    private static String mFileName=null;
+    private String messageReceiverID, messageReceiverName, messageuserImage, messageSenderID, currentDate, currentTime, currentUser;
+    private static String mFileName = null;
     private TextView userName, userLastSeen;
     private CircleImageView userImage;
-    private DatabaseReference RootRef,AudioRef,MessageAudioRef;
+    private DatabaseReference RootRef, AudioRef, MessageAudioRef,ImageRef,MessageImageRef;
     private Toolbar ChatToolbar;
     private FirebaseAuth mAuth;
-    private StorageReference mStorage;
-    private ImageButton sendMessagebutton,audioMessageButton,imageMessageButton;
+    private StorageReference audioPrivateChat, ImagePrivateChat;
+    private ImageButton sendMessagebutton, audioMessageButton, imageMessageButton;
     private EditText messageInputText;
     private final List<MessagesChatModel> messagelist = new ArrayList<>();
     private messagePrivateChatAdapter messageAdapter;
@@ -71,7 +72,10 @@ public class ChatActivity extends AppCompatActivity {
     private MediaRecorder mRecorder = null;
     private boolean permissionToRecordAccepted = false;
     private ProgressDialog mProgress;
-    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+    private String[] permissions = {Manifest.permission.RECORD_AUDIO};
+    private static final int MyPick = 2;
+    private Uri UriImageMessage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,10 +85,11 @@ public class ChatActivity extends AppCompatActivity {
         messageuserImage = getIntent().getExtras().get("userImage").toString();
 
         mAuth = FirebaseAuth.getInstance();
-        mStorage=FirebaseStorage.getInstance().getReference().child("Audio Messages");
+        audioPrivateChat = FirebaseStorage.getInstance().getReference().child("Audio Messages");
+        ImagePrivateChat = FirebaseStorage.getInstance().getReference().child("Image Message");
         messageSenderID = mAuth.getCurrentUser().getUid();
-        currentUser=messageSenderID;
-        mProgress=new ProgressDialog(this);
+        currentUser = messageSenderID;
+        mProgress = new ProgressDialog(this);
 
         RootRef = FirebaseDatabase.getInstance().getReference();
         InitializeFields();
@@ -104,7 +109,7 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         private_message_chat.smoothScrollToPosition(private_message_chat.getAdapter().getItemCount());
-                        private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount()-1);
+                        private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount() - 1);
                     }
                 });
             }
@@ -116,7 +121,7 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         private_message_chat.smoothScrollToPosition(private_message_chat.getAdapter().getItemCount());
-                        private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount()-1);
+                        private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount() - 1);
                     }
                 });
             }
@@ -125,12 +130,11 @@ public class ChatActivity extends AppCompatActivity {
         audioMessageButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
                     startRecording();
 
-                }
-                else if (event.getAction() == MotionEvent.ACTION_UP){
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
 
                     stopRecording();
 
@@ -142,7 +146,10 @@ public class ChatActivity extends AppCompatActivity {
         imageMessageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent GIntent = new Intent();
+                GIntent.setAction(Intent.ACTION_GET_CONTENT);
+                GIntent.setType("image/*");
+                startActivityForResult(GIntent, MyPick);
             }
         });
 
@@ -161,7 +168,7 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         private_message_chat.smoothScrollToPosition(private_message_chat.getAdapter().getItemCount());
-                        private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount()-1);
+                        private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount() - 1);
                     }
                 });
             }
@@ -190,21 +197,69 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == MyPick && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            UriImageMessage = data.getData();
+
+            if (UriImageMessage != null) {
+
+                ImageRef = RootRef.child("Messages")
+                        .child(messageSenderID).child(messageReceiverID).push();
+                final String messagePushID = ImageRef.getKey();
+                StorageReference red = ImagePrivateChat.child(currentUser).child(messagePushID + ".jpg");
+                red.putFile(UriImageMessage).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            final String downloadUrl = task.getResult().getDownloadUrl().toString();
+
+
+                            //RootRef.child("Users").child(currentUser).child("BackGround_Image").setValue(downloadUrl);
+                            MessageImageRef = RootRef.child("Messages").child(messageSenderID).child(messageReceiverID).child(messagePushID);
+                            String messageSenderRef = "Messages/" + messageSenderID + "/" + messageReceiverID;
+                            String messageReceiverRef = "Messages/" + messageReceiverID + "/" + messageSenderID;
+                            Calendar calForDate = Calendar.getInstance();
+                            SimpleDateFormat currentDateFormat = new SimpleDateFormat("MM dd,yyy");
+                            currentDate = currentDateFormat.format(calForDate.getTime());
+
+                            Calendar calForTime = Calendar.getInstance();
+                            SimpleDateFormat currentTimeFormat = new SimpleDateFormat("hh:mm ss a");
+                            currentTime = currentTimeFormat.format(calForTime.getTime());
+                            Map messageTextBody = new HashMap();
+                            messageTextBody.put("from_uid", messageSenderID);
+                            messageTextBody.put("message", downloadUrl);
+                            messageTextBody.put("date", currentDate);
+                            messageTextBody.put("time", currentTime);
+                            messageTextBody.put("type", "image");
+                            Map messageBodyDetails = new HashMap();
+                            messageBodyDetails.put(messageSenderRef + "/" + messagePushID, messageTextBody);
+                            messageBodyDetails.put(messageReceiverRef + "/" + messagePushID, messageTextBody);
+                            RootRef.updateChildren(messageBodyDetails);
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode){
+        switch (requestCode) {
             case REQUEST_RECORD_AUDIO_PERMISSION:
-                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                permissionToRecordAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 break;
         }
-        if (!permissionToRecordAccepted ) finish();
+        if (!permissionToRecordAccepted) finish();
 
     }
+
     private void startRecording() {
         AudioRef = RootRef.child("Messages")
                 .child(messageSenderID).child(messageReceiverID).push();
         String messagePushID = AudioRef.getKey();
-        mFileName = getExternalCacheDir().getAbsolutePath()+"/"+messagePushID+".mp3";
+        mFileName = getExternalCacheDir().getAbsolutePath() + "/" + messagePushID + ".mp3";
         mRecorder = new MediaRecorder();
 
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -227,14 +282,13 @@ public class ChatActivity extends AppCompatActivity {
         uploadAudio();
     }
 
-
     private void uploadAudio() {
         mProgress.setMessage("Sending Your Audio....");
         mProgress.show();
         AudioRef = RootRef.child("Messages")
                 .child(messageSenderID).child(messageReceiverID).push();
         final String messagePushID = AudioRef.getKey();
-        StorageReference filepath = mStorage.child(currentUser).child(messagePushID+".mp3");
+        StorageReference filepath = audioPrivateChat.child(currentUser).child(messagePushID + ".mp3");
         final Uri uri = Uri.fromFile(new File(mFileName));
 
         filepath.putFile(uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
@@ -243,20 +297,20 @@ public class ChatActivity extends AppCompatActivity {
                 //delete audio file is saved in storage
                 File file = new File(uri.getPath());
                 file.delete();
-                if(file.exists()){
+                if (file.exists()) {
                     try {
                         file.getCanonicalFile().delete();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    if(file.exists()){
+                    if (file.exists()) {
                         getApplicationContext().deleteFile(file.getName());
                     }
                 }
 
 
-                final String AudiodownloadUrl= task.getResult().getDownloadUrl().toString();
-                MessageAudioRef= RootRef.child("Messages").child(messageSenderID).child(messageReceiverID).child(messagePushID);
+                final String AudiodownloadUrl = task.getResult().getDownloadUrl().toString();
+                MessageAudioRef = RootRef.child("Messages").child(messageSenderID).child(messageReceiverID).child(messagePushID);
 
                 String messageSenderRef = "Messages/" + messageSenderID + "/" + messageReceiverID;
                 String messageReceiverRef = "Messages/" + messageReceiverID + "/" + messageSenderID;
@@ -277,11 +331,12 @@ public class ChatActivity extends AppCompatActivity {
                 messageBodyDetails.put(messageSenderRef + "/" + messagePushID, messageTextBody);
                 messageBodyDetails.put(messageReceiverRef + "/" + messagePushID, messageTextBody);
                 RootRef.updateChildren(messageBodyDetails);
-                Toast.makeText(getApplicationContext(),"done",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "done", Toast.LENGTH_SHORT).show();
                 mProgress.dismiss();
             }
         });
     }
+
     @Override
     public void onStop() {
         super.onStop();
@@ -335,7 +390,7 @@ public class ChatActivity extends AppCompatActivity {
         View actionBarView = layoutInflater.inflate(R.layout.custom_chat_bar, null);
         actionbar.setCustomView(actionBarView);
 
-        imageMessageButton=findViewById(R.id.image_message_btn);
+        imageMessageButton = findViewById(R.id.image_message_btn);
         audioMessageButton = findViewById(R.id.audio_message_btn);
         userImage = findViewById(R.id.custom_profile_image);
         private_message_chat = findViewById(R.id.private_message);
@@ -357,7 +412,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void run() {
                 private_message_chat.smoothScrollToPosition(private_message_chat.getAdapter().getItemCount());
-                private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount()-1);
+                private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount() - 1);
             }
         });
     }

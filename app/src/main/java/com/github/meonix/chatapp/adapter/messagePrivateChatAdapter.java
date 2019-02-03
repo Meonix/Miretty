@@ -128,7 +128,8 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                     // TODO: handle exception
                 }
             }
-        });
+        })
+        ;
         messageViewHolder.audioOfReceiver.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,6 +168,8 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
             messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
             messageViewHolder.audioOfSender.setVisibility(View.GONE);
             messageViewHolder.audioOfReceiver.setVisibility(View.GONE);
+            messageViewHolder.receiverImage.setVisibility(View.GONE);
+            messageViewHolder.senderImage.setVisibility(View.GONE);
 
             messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
             messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
@@ -205,6 +208,8 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
             messageViewHolder.audioOfReceiver.setVisibility(View.INVISIBLE);
             messageViewHolder.senderPrivateMessage.setVisibility(View.GONE);
             messageViewHolder.receiverPrivateMessage.setVisibility(View.GONE);
+            messageViewHolder.receiverImage.setVisibility(View.GONE);
+            messageViewHolder.senderImage.setVisibility(View.GONE);
 
             messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
             messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
@@ -224,6 +229,46 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                 messageViewHolder.receiverMessageCard.setVisibility(View.VISIBLE);
                 messageViewHolder.audioOfReceiver.setVisibility(View.VISIBLE);
 
+                messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
+
+                messageViewHolder.receiverMessageCard.setBackgroundResource(R.drawable.receiver_message_layout);
+                messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
+
+            }
+        }
+        else if(fromMessageType.equals("image"))
+        {
+            messageViewHolder.senderPrivateMessage.setVisibility(View.GONE);
+            messageViewHolder.receiverPrivateMessage.setVisibility(View.GONE);
+            messageViewHolder.receiverMessageCard.setVisibility(View.INVISIBLE);
+            messageViewHolder.avatarRevceiver.setVisibility(View.INVISIBLE);
+            messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
+            messageViewHolder.audioOfSender.setVisibility(View.GONE);
+            messageViewHolder.audioOfReceiver.setVisibility(View.GONE);
+            messageViewHolder.receiverImage.setVisibility(View.INVISIBLE);
+            messageViewHolder.senderImage.setVisibility(View.INVISIBLE);
+
+            messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
+            messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
+            if (fromUserID.equals(messageSenderID)) {
+                messageViewHolder.senderMessageCard.setVisibility(View.VISIBLE);
+                messageViewHolder.senderMessageCard.setBackgroundResource(R.drawable.sender_message_layout);
+                messageViewHolder.senderImage.setVisibility(View.VISIBLE);
+
+                String urlImage=messages.getMessage();
+                Picasso.get().load(urlImage).into(messageViewHolder.senderImage);
+                messageViewHolder.PrivateMessageTime.setText(messages.getTime());
+                messageViewHolder.PrivateMessageDate.setText(messages.getDate());
+
+            } else {
+                messageViewHolder.receiverImage.setVisibility(View.VISIBLE);
+                messageViewHolder.PrivateMessageTime.setText(messages.getTime());
+                messageViewHolder.PrivateMessageDate.setText(messages.getDate());
+                messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
+                messageViewHolder.receiverMessageCard.setVisibility(View.VISIBLE);
+
+                String urlImage=messages.getMessage();
+                Picasso.get().load(urlImage).into(messageViewHolder.receiverImage);
                 messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
 
                 messageViewHolder.receiverMessageCard.setBackgroundResource(R.drawable.receiver_message_layout);
