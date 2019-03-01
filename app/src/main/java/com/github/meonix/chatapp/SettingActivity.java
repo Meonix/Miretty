@@ -3,6 +3,7 @@ package com.github.meonix.chatapp;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -37,7 +38,9 @@ import com.squareup.picasso.Target;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -136,6 +139,7 @@ public class SettingActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MyPick && resultCode == RESULT_OK && data != null && data.getData() != null) {
             UriImagebackground = data.getData();
+
             loadingBar.setTitle("Set BackGround Image");
             loadingBar.setMessage("Please wait ,your  backGround image is updating....");
             loadingBar.setCanceledOnTouchOutside(false);
@@ -143,7 +147,7 @@ public class SettingActivity extends AppCompatActivity {
 
             if (UriImagebackground != null) {
                 StorageReference red = UserBackGroundImage.child(currentUserID + ".jpg");
-                red.putFile(UriImagebackground).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                red.putBytes(compressImage(UriImagebackground).toByteArray()).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         if (task.isSuccessful()) {
@@ -190,7 +194,7 @@ public class SettingActivity extends AppCompatActivity {
 
                 StorageReference filePath = UserProfileImageRef.child(currentUserID + ".jpg");
 
-                filePath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                filePath.putBytes(compressImage(resultUri).toByteArray()).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         if (task.isSuccessful()) {
@@ -321,4 +325,40 @@ public class SettingActivity extends AppCompatActivity {
         finish();
     }
 
+    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        return resizedBitmap;
+    }
+
+    public ByteArrayOutputStream compressImage(Uri image)
+    {
+        Bitmap original = null;
+        try {
+            original = MediaStore.Images.Media.getBitmap(this.getContentResolver(),image);
+        } catch (IOException e) {
+            return null;
+        }
+
+        int height = original.getHeight();
+        int width = original.getWidth();
+        if (height > 2048) {
+            width = (int) (width * (2048.0f / height));
+            original = getResizedBitmap(original, width, 2048);
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        original.compress(Bitmap.CompressFormat.JPEG, 47, out);
+        return out;
+    }
 }

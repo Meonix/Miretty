@@ -6,9 +6,12 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -43,6 +46,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -213,7 +217,7 @@ public class ChatActivity extends AppCompatActivity {
                             .child(messageSenderID).child(messageReceiverID).push();
                     final String messagePushID = ImageRef.getKey();
                     StorageReference red = ImagePrivateChat.child(currentUser).child(messagePushID + ".jpg");
-                    red.putFile(UriImageMessage).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    red.putBytes(compressImage(UriImageMessage).toByteArray()).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                             if (task.isSuccessful()) {
@@ -461,5 +465,42 @@ public class ChatActivity extends AppCompatActivity {
                 private_message_chat.scrollToPosition(private_message_chat.getAdapter().getItemCount() - 1);
             }
         });
+    }
+
+    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        return resizedBitmap;
+    }
+
+    public ByteArrayOutputStream compressImage(Uri image)
+    {
+        Bitmap original = null;
+        try {
+            original = MediaStore.Images.Media.getBitmap(this.getContentResolver(),image);
+        } catch (IOException e) {
+            return null;
+        }
+
+        int height = original.getHeight();
+        int width = original.getWidth();
+        if (height > 2048) {
+            width = (int) (width * (2048.0f / height));
+            original = getResizedBitmap(original, width, 2048);
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        original.compress(Bitmap.CompressFormat.JPEG, 47, out);
+        return out;
     }
 }
