@@ -46,6 +46,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -63,7 +66,7 @@ public class ChatActivity extends AppCompatActivity {
     private static String mFileName = null;
     private TextView userName, userLastSeen;
     private CircleImageView userImage;
-    private DatabaseReference RootRef, AudioRef, MessageAudioRef, ImageRef, MessageImageRef;
+    private DatabaseReference RootRef, AudioRef, MessageAudioRef, ImageRef, MessageImageRef,NoitificationRef;
     private Toolbar ChatToolbar;
     private FirebaseAuth mAuth;
     private StorageReference audioPrivateChat, ImagePrivateChat, videoPrivateChat;
@@ -80,7 +83,6 @@ public class ChatActivity extends AppCompatActivity {
     private String[] permissions = {Manifest.permission.RECORD_AUDIO};
     private static final int MyPick = 2;
     private Uri UriImageMessage;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,7 +95,9 @@ public class ChatActivity extends AppCompatActivity {
         audioPrivateChat = FirebaseStorage.getInstance().getReference().child("Audio Messages");
         ImagePrivateChat = FirebaseStorage.getInstance().getReference().child("Image Message");
         videoPrivateChat = FirebaseStorage.getInstance().getReference().child("Video Messages");
+        NoitificationRef = FirebaseDatabase.getInstance().getReference().child("Notifications");
         messageSenderID = mAuth.getCurrentUser().getUid();
+
         currentUser = messageSenderID;
         mProgress = new ProgressDialog(this);
 
@@ -424,9 +428,17 @@ public class ChatActivity extends AppCompatActivity {
             messageBodyDetails.put(messageSenderRef + "/" + messagePushID, messageTextBody);
             messageBodyDetails.put(messageReceiverRef + "/" + messagePushID, messageTextBody);
             RootRef.updateChildren(messageBodyDetails);
+
+            HashMap<String, String> chatnotificationHasmap = new HashMap<>();
+            chatnotificationHasmap.put("from", messageSenderID);
+            chatnotificationHasmap.put("type", "request");
+            NoitificationRef.child(messageReceiverID).push()
+                    .setValue(chatnotificationHasmap);
+
             messageInputText.setText("");
         }
     }
+
 
     private void InitializeFields() {
         ChatToolbar = findViewById(R.id.chat_toolbar);

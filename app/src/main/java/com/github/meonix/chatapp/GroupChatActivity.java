@@ -205,15 +205,15 @@ public class GroupChatActivity extends AppCompatActivity {
             HashMap<String, String> chatnotificationHasmap = new HashMap<>();
             chatnotificationHasmap.put("from", currentUserID);
             chatnotificationHasmap.put("type", "request");
-            NoitificationRef.child("fst0LsvJa6eYs45ZlqvI7UrLkIE3").push().setValue(chatnotificationHasmap)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-
-                            }
-                        }
-                    });
+//            NoitificationRef.child("rciFFlsy3zWbSgBcgrC5k1o2nbt1").push().setValue(chatnotificationHasmap)
+//                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+//                        @Override
+//                        public void onComplete(@NonNull Task<Void> task) {
+//                            if (task.isSuccessful()) {
+//
+//                            }
+//                        }
+//                    });
         }
     }
 
