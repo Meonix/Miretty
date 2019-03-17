@@ -59,6 +59,20 @@ public class MainActivity extends AppCompatActivity {
 
         myTablayout = (TabLayout) findViewById(R.id.main_tabs);
         myTablayout.setupWithViewPager(myViewPage);
+
+        final int[] ICONS = new int[]{
+                R.drawable.chatfragment,
+                R.drawable.groupchatfragment,
+                R.drawable.contactfragment,
+                R.drawable.requestfragment
+        };
+
+        //Get reference to your Tablayout
+
+        myTablayout.getTabAt(0).setIcon(ICONS[0]);
+        myTablayout.getTabAt(1).setIcon(ICONS[1]);
+        myTablayout.getTabAt(2).setIcon(ICONS[2]);
+        myTablayout.getTabAt(3).setIcon(ICONS[3]);
     }
 
     @Override
