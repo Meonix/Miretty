@@ -1,5 +1,6 @@
 package com.github.meonix.chatapp.adapter;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -16,7 +17,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import com.github.meonix.chatapp.FindFriendsActivity;
+import com.github.meonix.chatapp.ProfileActivity;
 import com.github.meonix.chatapp.R;
+import com.github.meonix.chatapp.ZoomImage;
 import com.github.meonix.chatapp.model.MessagesChatModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -265,11 +269,18 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                 messageViewHolder.senderMessageCard.setBackgroundResource(R.drawable.sender_message_layout);
                 messageViewHolder.senderImage.setVisibility(View.VISIBLE);
 
-                String urlImage = messages.getMessage();
+                final String urlImage = messages.getMessage();
                 Picasso.get().load(urlImage).into(messageViewHolder.senderImage);
                 messageViewHolder.PrivateMessageTime.setText(messages.getTime());
                 messageViewHolder.PrivateMessageDate.setText(messages.getDate());
-
+                messageViewHolder.senderMessageCard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent ZoomImage=new Intent(v.getContext(), ZoomImage.class);
+                        ZoomImage.putExtra("imageURL",urlImage);
+                        v.getContext().startActivity(ZoomImage);
+                    }
+                });
             } else {
                 messageViewHolder.receiverImage.setVisibility(View.VISIBLE);
                 messageViewHolder.PrivateMessageTime.setText(messages.getTime());

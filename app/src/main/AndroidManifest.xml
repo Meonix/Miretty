@@ -15,6 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ZoomImage"
+            android:parentActivityName=".ChatActivity">
+        </activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,7 +29,7 @@
         <activity android:name=".RegisterActivity" />
         <activity
             android:name=".GroupChatActivity"
-            android:parentActivityName=".FindFriendsActivity"/>
+            android:parentActivityName=".FindFriendsActivity" />
         <activity
             android:name=".SettingActivity"
             android:parentActivityName=".MainActivity" />
@@ -40,9 +43,9 @@
         <activity
             android:name=".ProfileActivity"
             android:parentActivityName=".FindFriendsActivity" />
-        <activity android:name=".ChatActivity"
-            android:parentActivityName=".MainActivity"
-            ></activity>
+        <activity
+            android:name=".ChatActivity"
+            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>
