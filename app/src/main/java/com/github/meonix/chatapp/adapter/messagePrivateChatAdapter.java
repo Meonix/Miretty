@@ -188,7 +188,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
 
             if (fromUserID.equals(messageSenderID)) {
                 messageViewHolder.senderMessageCard.setVisibility(View.VISIBLE);
-                messageViewHolder.senderMessageCard.setBackgroundResource(R.drawable.sender_message_layout);
+//                messageViewHolder.senderMessageCard.setBackgroundResource(R.drawable.sender_message_layout);
                 messageViewHolder.senderPrivateMessage.setVisibility(View.VISIBLE);
                 messageViewHolder.senderPrivateMessage.setTextColor(Color.WHITE);
                 messageViewHolder.senderPrivateMessage.setText(messages.getMessage());
@@ -204,7 +204,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
 
                 messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
 
-                messageViewHolder.receiverMessageCard.setBackgroundResource(R.drawable.receiver_message_layout);
+//                messageViewHolder.receiverMessageCard.setBackgroundResource(R.drawable.receiver_message_layout);
 
                 messageViewHolder.receiverPrivateMessage.setVisibility(View.VISIBLE);
                 messageViewHolder.receiverPrivateMessage.setTextColor(Color.BLACK);
@@ -264,12 +264,13 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
 
             messageViewHolder.PrivateMessageTime.setVisibility(View.INVISIBLE);
             messageViewHolder.PrivateMessageDate.setVisibility(View.INVISIBLE);
+
+            final String urlImage = messages.getMessage();
             if (fromUserID.equals(messageSenderID)) {
                 messageViewHolder.senderMessageCard.setVisibility(View.VISIBLE);
-                messageViewHolder.senderMessageCard.setBackgroundResource(R.drawable.sender_message_layout);
+//                messageViewHolder.senderMessageCard.setBackgroundResource(R.drawable.sender_message_layout);
                 messageViewHolder.senderImage.setVisibility(View.VISIBLE);
 
-                final String urlImage = messages.getMessage();
                 Picasso.get().load(urlImage).into(messageViewHolder.senderImage);
                 messageViewHolder.PrivateMessageTime.setText(messages.getTime());
                 messageViewHolder.PrivateMessageDate.setText(messages.getDate());
@@ -288,13 +289,19 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
                 messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
                 messageViewHolder.receiverMessageCard.setVisibility(View.VISIBLE);
 
-                String urlImage = messages.getMessage();
                 Picasso.get().load(urlImage).into(messageViewHolder.receiverImage);
                 messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
 
-                messageViewHolder.receiverMessageCard.setBackgroundResource(R.drawable.receiver_message_layout);
+//                messageViewHolder.receiverMessageCard.setBackgroundResource(R.drawable.receiver_message_layout);
                 messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
-
+                messageViewHolder.receiverMessageCard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent ZoomImage=new Intent(v.getContext(), ZoomImage.class);
+                        ZoomImage.putExtra("imageURL",urlImage);
+                        v.getContext().startActivity(ZoomImage);
+                    }
+                });
             }
         } else if (fromMessageType.equals("video")) {
             messageViewHolder.senderPrivateMessage.setVisibility(View.GONE);

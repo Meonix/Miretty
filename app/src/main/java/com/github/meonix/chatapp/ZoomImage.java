@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.PhotoView;
@@ -17,7 +16,6 @@ public class ZoomImage extends AppCompatActivity {
     private PhotoView ZoomImageView;
     private ProgressDialog progressDialog;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,21 +24,32 @@ public class ZoomImage extends AppCompatActivity {
         ZoomImageView = findViewById(R.id.pvZoomImage);
         linkImage = getIntent().getExtras().get("imageURL").toString();
         Picasso.get().load(linkImage).into(ZoomImageView);
-        registerForContextMenu(ZoomImageView);
+
+
+        ZoomImageView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                registerForContextMenu(ZoomImageView);
+                ZoomImageView.showContextMenu();
+                unregisterForContextMenu(ZoomImageView);
+                return true;
+            }
+        });
     }
+
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        getMenuInflater().inflate(R.menu.zoom_image_options,menu);
+        getMenuInflater().inflate(R.menu.zoom_image_options, menu);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId())
-        {
+        switch (item.getItemId()) {
             case R.id.downloadImage:
                 progressDialog.setTitle("Image is Downloading...");
                 progressDialog.show();
+
 
 
                 progressDialog.dismiss();
@@ -51,3 +60,4 @@ public class ZoomImage extends AppCompatActivity {
         }
     }
 }
+
