@@ -61,7 +61,7 @@ public class ZoomImage extends AppCompatActivity {
                                           // Get the directory for the user's public pictures directory.
                                           File file = new File(Environment.getExternalStoragePublicDirectory(
                                                   Environment.DIRECTORY_PICTURES), "Miretty");
-
+                                          file.mkdir();
                                           final File externalFile = new File(file, System.currentTimeMillis() + ".jpg");
 
                                           FileOutputStream out = new FileOutputStream(externalFile);

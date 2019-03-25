@@ -2,13 +2,11 @@ package com.github.meonix.chatapp.adapter;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +15,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.VideoView;
 
-import com.github.meonix.chatapp.FindFriendsActivity;
-import com.github.meonix.chatapp.ProfileActivity;
 import com.github.meonix.chatapp.R;
 import com.github.meonix.chatapp.ZoomImage;
 import com.github.meonix.chatapp.model.MessagesChatModel;
@@ -75,6 +71,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
 
     public messagePrivateChatAdapter(List<MessagesChatModel> userMessageList) {
         this.userMessageList = userMessageList;
+        this.mAuth = FirebaseAuth.getInstance();
     }
 
 
@@ -82,7 +79,6 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
     @Override
     public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.private_message_layout, viewGroup, false);
-        mAuth = FirebaseAuth.getInstance();
         return new MessageViewHolder(view);
     }
 
@@ -179,7 +175,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
             messageViewHolder.receiverVideo.setVisibility(View.GONE);
             messageViewHolder.senderVideo.setVisibility(View.GONE);
 
-            messageViewHolder.receiverMessageCard.setVisibility(View.INVISIBLE);
+            messageViewHolder.receiverMessageCard.setVisibility(View.GONE);
             messageViewHolder.avatarRevceiver.setVisibility(View.INVISIBLE);
             messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
 
@@ -199,7 +195,7 @@ public class messagePrivateChatAdapter extends RecyclerView.Adapter<messagePriva
 
                 messageViewHolder.PrivateMessageTime.setText(messages.getTime());
                 messageViewHolder.PrivateMessageDate.setText(messages.getDate());
-                messageViewHolder.senderMessageCard.setVisibility(View.INVISIBLE);
+                messageViewHolder.senderMessageCard.setVisibility(View.GONE);
                 messageViewHolder.receiverMessageCard.setVisibility(View.VISIBLE);
 
                 messageViewHolder.avatarRevceiver.setVisibility(View.VISIBLE);
