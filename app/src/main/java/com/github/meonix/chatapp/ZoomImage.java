@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.PhotoView;
@@ -24,6 +26,12 @@ public class ZoomImage extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //hide Status bar
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+
         setContentView(R.layout.activity_zoom_image);
         ZoomImageView = findViewById(R.id.pvZoomImage);
         linkImage = getIntent().getExtras().get("imageURL").toString();
