@@ -70,7 +70,7 @@ public class ChatActivity extends AppCompatActivity {
     private Toolbar ChatToolbar;
     private FirebaseAuth mAuth;
     private StorageReference audioPrivateChat, ImagePrivateChat, videoPrivateChat;
-    private ImageButton sendMessagebutton, audioMessageButton, imageMessageButton;
+    private ImageButton sendMessagebutton, audioMessageButton, imageMessageButton ,btn_videocCall;
     private EditText messageInputText;
     private final List<MessagesChatModel> messagelist = new ArrayList<>();
     private messagePrivateChatAdapter messageAdapter;
@@ -90,6 +90,7 @@ public class ChatActivity extends AppCompatActivity {
         messageReceiverID = getIntent().getExtras().get("visit_user_id").toString();
         messageReceiverName = getIntent().getExtras().get("visit_user_name").toString();
         messageuserImage = getIntent().getExtras().get("userImage").toString();
+        btn_videocCall = findViewById(R.id.btn_videoCall);
 
         mAuth = FirebaseAuth.getInstance();
         audioPrivateChat = FirebaseStorage.getInstance().getReference().child("Audio Messages");
@@ -136,6 +137,15 @@ public class ChatActivity extends AppCompatActivity {
                 });
             }
         });
+
+        btn_videocCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent findfriendsIntent = new Intent(ChatActivity.this,ViceoCall_Activity.class);
+                startActivity(findfriendsIntent);
+            }
+        });
+
 
         audioMessageButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
